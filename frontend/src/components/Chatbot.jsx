@@ -29,7 +29,7 @@ export default function Chatbot({ onUpdateCart }) {
       if (res.data.action_taken) {
         onUpdateCart();
       }
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: '네트워크 오류가 발생했습니다. 백엔드 서버가 켜져 있는지 확인해주세요.' }]);
     } finally {
       setIsLoading(false);

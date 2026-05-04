@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Plus, Search, Tag } from 'lucide-react';
 
@@ -23,11 +23,13 @@ export default function CourseSearch({ onAdd }) {
 
   // Reset display count when search or tab changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDisplayCount(20);
   }, [searchTerm, activeTab]);
 
   // Infinite scroll intersection observer
   useEffect(() => {
+    const currentTarget = observerTarget.current;
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
@@ -37,12 +39,12 @@ export default function CourseSearch({ onAdd }) {
       { threshold: 0.1 }
     );
     
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (currentTarget) {
+      observer.observe(currentTarget);
     }
     
     return () => {
-      if (observerTarget.current) observer.unobserve(observerTarget.current);
+      if (currentTarget) observer.unobserve(currentTarget);
     };
   }, [observerTarget]);
 
