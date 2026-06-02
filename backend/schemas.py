@@ -10,6 +10,7 @@ class CourseBase(BaseModel):
     tags: str
     location: str
     schedule: str
+    is_pn_eligible: bool = False
 
 class CourseCreate(CourseBase):
     pass

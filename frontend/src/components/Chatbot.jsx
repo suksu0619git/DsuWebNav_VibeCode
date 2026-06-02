@@ -24,7 +24,7 @@ export default function Chatbot({ onUpdateCart }) {
     setIsLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:8000/chat', { message: userMsg });
+      const res = await axios.post('http://127.0.0.1:8000/chat', { message: userMsg });
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
       if (res.data.action_taken) {
         onUpdateCart();

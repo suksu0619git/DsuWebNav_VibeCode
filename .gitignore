@@ -1,0 +1,11 @@
+# Python virtual environment
+backend/venv/
+backend/.env
+
+# Python pycache
+__pycache__/
+*.pyc
+backend/__pycache__/
+
+# Editor/IDE directories
+.vscode/

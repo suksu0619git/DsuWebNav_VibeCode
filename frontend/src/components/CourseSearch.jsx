@@ -2,17 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Plus, Search, Tag } from 'lucide-react';
 
-export default function CourseSearch({ onAdd }) {
+export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab = 'all' }) {
   const [courses, setCourses] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('all'); // 'all', 'major', 'general'
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+  const [activeTab, setActiveTab] = useState(initialTab); // 'all', 'major', 'general'
   const [displayCount, setDisplayCount] = useState(20);
   const observerTarget = useRef(null);
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/courses?limit=3000');
+        const res = await axios.get('http://127.0.0.1:8000/courses?limit=3000');
         setCourses(res.data);
       } catch (err) {
         console.error(err);
@@ -26,6 +26,11 @@ export default function CourseSearch({ onAdd }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDisplayCount(20);
   }, [searchTerm, activeTab]);
+  
+  useEffect(() => {
+    if (initialSearchTerm !== searchTerm) setSearchTerm(initialSearchTerm);
+    if (initialTab !== activeTab) setActiveTab(initialTab);
+  }, [initialSearchTerm, initialTab]);
 
   // Infinite scroll intersection observer
   useEffect(() => {
@@ -61,7 +66,8 @@ export default function CourseSearch({ onAdd }) {
     const matchSearch = 
       c.title.includes(searchTerm) || 
       c.tags.includes(searchTerm) ||
-      c.professor.includes(searchTerm);
+      c.professor.includes(searchTerm) ||
+      c.schedule.includes(searchTerm); // Added schedule search
 
     return matchTab && matchSearch;
   });
@@ -70,7 +76,7 @@ export default function CourseSearch({ onAdd }) {
 
   const handleAdd = async (courseId) => {
     try {
-      await axios.post('http://localhost:8000/cart', {
+      await axios.post('http://127.0.0.1:8000/cart', {
         course_id: courseId,
         user_id: 1
       });
@@ -124,6 +130,9 @@ export default function CourseSearch({ onAdd }) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-bold px-2 py-1 bg-slate-700 rounded-md text-slate-300">{course.code}</span>
                   <span className="text-xs font-bold px-2 py-1 bg-primary/20 text-primary rounded-md">{course.category}</span>
+                  {course.is_pn_eligible && (
+                    <span className="text-xs font-bold px-2 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded-md shadow-sm">P/N 가능</span>
+                  )}
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1">{course.title} <span className="text-sm font-normal text-slate-400 ml-2">{course.credits}학점</span></h3>
                 <p className="text-sm text-slate-400 mb-2">{course.professor} | {course.schedule} | {course.location}</p>

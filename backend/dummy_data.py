@@ -21,7 +21,7 @@ def init_db():
         ),
         models.Course(
             code="GE201", title="인간과 심리", professor="박심리", credits=2,
-            category="교양", tags="인문/사회,심리학,교양", location="인문관 105호", schedule="금1,금2"
+            category="교양", tags="인문/사회,심리학,교양", location="인문관 105호", schedule="금1,금2", is_pn_eligible=1
         ),
         models.Course(
             code="CS301", title="인공지능 개론", professor="최AI", credits=3,
@@ -29,7 +29,7 @@ def init_db():
         ),
         models.Course(
             code="GE301", title="실용 영어 회화", professor="John Doe", credits=2,
-            category="교양", tags="어학,영어,회화", location="본관 201호", schedule="화1,화2"
+            category="교양", tags="어학,영어,회화", location="본관 201호", schedule="화1,화2", is_pn_eligible=1
         ),
     ]
 

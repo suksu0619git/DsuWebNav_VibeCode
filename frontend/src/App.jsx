@@ -9,10 +9,12 @@ import CreditDashboard from './components/CreditDashboard';
 function App() {
   const [activeTab, setActiveTab] = useState('search');
   const [cart, setCart] = useState([]);
+  const [initialSearchTerm, setInitialSearchTerm] = useState('');
+  const [initialSearchTab, setInitialSearchTab] = useState('all');
   
   const fetchCart = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/cart');
+      const res = await axios.get('http://127.0.0.1:8000/cart');
       setCart(res.data);
     } catch (err) {
       console.error(err);
@@ -23,6 +25,12 @@ function App() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCart();
   }, []);
+
+  const handleSlotSelect = (timeQuery) => {
+    setInitialSearchTerm(timeQuery);
+    setInitialSearchTab('general'); // 교양 탭으로 기본 설정
+    setActiveTab('search');
+  };
 
   return (
     <div className="min-h-screen bg-background text-slate-200 flex flex-col font-sans">
@@ -57,8 +65,8 @@ function App() {
 
       <main className="flex-1 container mx-auto p-4 flex gap-6 relative">
         <div className="flex-1 bg-surface rounded-2xl shadow-xl border border-slate-700 overflow-hidden flex flex-col relative z-0">
-          {activeTab === 'search' && <CourseSearch onAdd={() => fetchCart()} />}
-          {activeTab === 'timetable' && <Timetable cart={cart} onRemove={() => fetchCart()} />}
+          {activeTab === 'search' && <CourseSearch onAdd={() => fetchCart()} initialSearchTerm={initialSearchTerm} initialTab={initialSearchTab} />}
+          {activeTab === 'timetable' && <Timetable cart={cart} onRemove={() => fetchCart()} onSlotSelect={handleSlotSelect} />}
           {activeTab === 'credits' && <CreditDashboard cart={cart} />}
         </div>
         
