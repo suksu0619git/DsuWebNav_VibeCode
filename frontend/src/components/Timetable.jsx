@@ -557,7 +557,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                   placeholder="예: CS101,CS202"
                   value={friendCodeInput}
                   onChange={e => setFriendCodeInput(e.target.value)}
-                  style={{ width: '100%', height: '50px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px', fontSize: '12px', color: '#fff', resize: 'none', marginTop: '4px', outline: 'none' }}
+                  style={{ width: '100%', height: '50px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px', fontSize: '12px', color: '#1e293b', resize: 'none', marginTop: '4px', outline: 'none' }}
                 />
               </div>
 
@@ -625,7 +625,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                   <select
                     value={constraints.minCredits}
                     onChange={e => setConstraints({ ...constraints, minCredits: parseInt(e.target.value) })}
-                    style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '2px 4px', fontSize: '11px', color: '#fff' }}
+                    style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '2px 4px', fontSize: '11px', color: '#1e293b' }}
                   >
                     <option value={9}>9학점 이상</option>
                     <option value={12}>12학점 이상</option>

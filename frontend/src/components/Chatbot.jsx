@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Send, Bot, User } from 'lucide-react';
 
-export default function Chatbot({ onUpdateCart }) {
+export default function Chatbot({ onUpdateCart, initialMessage = '' }) {
   const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   const [messages, setMessages] = useState([
     { role: 'assistant', content: '안녕하세요! 수강신청 비서입니다. 무엇을 도와드릴까요? (예: "장바구니에 CS101 담아줘", "파이썬 관련 교양 추천해줘")' }
@@ -14,6 +14,26 @@ export default function Chatbot({ onUpdateCart }) {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Auto-send initial message from Home page
+  useEffect(() => {
+    if (initialMessage && initialMessage.trim()) {
+      const autoSend = async () => {
+        setMessages(prev => [...prev, { role: 'user', content: initialMessage }]);
+        setIsLoading(true);
+        try {
+          const res = await axios.post(`${API_URL}/chat`, { message: initialMessage });
+          setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
+          if (res.data.action_taken) onUpdateCart();
+        } catch {
+          setMessages(prev => [...prev, { role: 'assistant', content: '네트워크 오류가 발생했습니다.' }]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      autoSend();
+    }
+  }, [initialMessage]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -42,18 +62,22 @@ export default function Chatbot({ onUpdateCart }) {
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {messages.map((m, i) => (
           <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${m.role === 'user' ? 'bg-accent' : 'bg-primary'}`}>
-              {m.role === 'user' ? <User size={16} /> : <Bot size={16} />}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${m.role === 'user' ? 'bg-primary' : 'bg-slate-200'}`}>
+              {m.role === 'user' ? <User size={16} className="text-white" /> : <Bot size={16} className="text-slate-600" />}
             </div>
-            <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-accent/20 text-accent-50 rounded-tr-none' : 'bg-slate-200/50 text-slate-700 rounded-tl-none'}`}>
+            <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed ${
+              m.role === 'user'
+                ? 'bg-primary text-white rounded-tr-none'
+                : 'bg-slate-100 text-slate-800 rounded-tl-none'
+            }`}>
               {m.content.split('\n').map((line, j) => <p key={j}>{line}</p>)}
             </div>
           </div>
         ))}
         {isLoading && (
           <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <Bot size={16} />
+            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+              <Bot size={16} className="text-slate-600" />
             </div>
             <div className="bg-slate-200/50 p-3 rounded-2xl rounded-tl-none flex gap-1 items-center">
               <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
@@ -76,7 +100,7 @@ export default function Chatbot({ onUpdateCart }) {
           <button 
             type="submit" 
             disabled={isLoading || !input.trim()}
-            className="absolute right-2 p-2 bg-accent hover:bg-accent/80 text-white rounded-full transition-colors disabled:opacity-50"
+            className="absolute right-2 p-2 bg-primary hover:bg-secondary text-white rounded-full transition-colors disabled:opacity-50"
           >
             <Send size={16} />
           </button>

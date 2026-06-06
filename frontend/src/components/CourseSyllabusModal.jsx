@@ -62,7 +62,7 @@ export default function CourseSyllabusModal({ course, onClose }) {
               <span className="bg-slate-200 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-md">{course.code}</span>
               <span className="bg-slate-200 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-md">{syllabusData.type}</span>
             </div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
               <Book className="text-accent" /> {course.title}
             </h2>
           </div>
@@ -76,7 +76,7 @@ export default function CourseSyllabusModal({ course, onClose }) {
           
           {/* Basic Info Grid */}
           <section>
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
+            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
               <Info size={18} className="text-primary" /> 기본 정보
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -101,7 +101,7 @@ export default function CourseSyllabusModal({ course, onClose }) {
 
           {/* Evaluation & Materials */}
           <section>
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
+            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
               <Award size={18} className="text-primary" /> 평가 및 교재
             </h3>
             <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden text-sm">
@@ -124,7 +124,7 @@ export default function CourseSyllabusModal({ course, onClose }) {
 
           {/* Overview & Goals */}
           <section>
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
+            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
               <LayoutList size={18} className="text-primary" /> 수업 개요 및 목표
             </h3>
             <div className="space-y-4">
@@ -153,7 +153,7 @@ export default function CourseSyllabusModal({ course, onClose }) {
 
           {/* Weekly Plan */}
           <section>
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
+            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
               <CalendarDays size={18} className="text-primary" /> 주별 강의계획서
             </h3>
             <div className="border border-slate-200 rounded-xl overflow-hidden">

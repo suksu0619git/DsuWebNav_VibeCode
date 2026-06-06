@@ -214,10 +214,10 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
                   <span className="text-xs font-bold px-2 py-1 bg-slate-200 rounded-md text-slate-600">{course.code}</span>
                   <span className="text-xs font-bold px-2 py-1 bg-primary/20 text-primary rounded-md">{course.category}</span>
                   {course.is_pn_eligible && (
-                    <span className="text-xs font-bold px-2 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded-md shadow-sm">P/N 가능</span>
+                    <span className="text-xs font-bold px-2 py-1 bg-green-100 text-green-700 border border-green-200 rounded-md">P/N 가능</span>
                   )}
                 </div>
-                <h3 className="text-xl font-bold text-white mb-1">{course.title} <span className="text-sm font-normal text-slate-500 ml-2">{course.credits}학점</span></h3>
+                <h3 className="text-xl font-bold text-slate-800 mb-1">{course.title} <span className="text-sm font-normal text-slate-500 ml-2">{course.credits}학점</span></h3>
                 <p className="text-sm text-slate-500 mb-2">{course.professor} | {course.schedule} | {course.location}</p>
                 <div className="flex gap-2">
                   {course.tags.split(',').map(tag => {
@@ -246,7 +246,7 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
                 </button>
                 <button 
                   onClick={() => setSelectedCourseForSyllabus(course)}
-                  className="bg-slate-200/50 text-slate-600 hover:bg-slate-300 hover:text-white p-3 rounded-xl transition-all"
+                  className="bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800 p-3 rounded-xl transition-all"
                   title="강의계획서 보기"
                 >
                   <FileText size={20} />
