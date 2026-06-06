@@ -19,12 +19,22 @@ function App() {
   const [studentId, setStudentId] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(true);
 
-  // Load from local storage
+  // Load from local storage or URL
   useEffect(() => {
-    const saved = localStorage.getItem('dsu_student_id');
-    if (saved) {
-      setStudentId(saved);
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlStudentId = urlParams.get('student_id');
+
+    if (urlStudentId) {
+      localStorage.setItem('dsu_student_id', urlStudentId);
+      setStudentId(urlStudentId);
       setShowLoginModal(false);
+      setActiveTab('timetable'); // QR 코드로 접속 시 시간표 탭으로 바로 이동
+    } else {
+      const saved = localStorage.getItem('dsu_student_id');
+      if (saved) {
+        setStudentId(saved);
+        setShowLoginModal(false);
+      }
     }
   }, []);
 

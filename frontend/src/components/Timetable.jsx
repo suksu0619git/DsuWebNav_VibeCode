@@ -860,12 +860,12 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect }) {
               <QrCode size={32} />
             </div>
             <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#1e293b' }}>내 시간표 QR 코드</h3>
-            <p style={{ margin: 0, fontSize: '12px', color: '#64748b', textAlign: 'center', lineHeight: '1.5' }}>스마트폰으로 스캔하여 시간표 내역(텍스트)을 빠르게 확인할 수 있습니다.</p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#64748b', textAlign: 'center', lineHeight: '1.5' }}>스마트폰으로 스캔하면 모바일 브라우저에서<br/>내 시간표를 그대로 볼 수 있습니다.</p>
             <div style={{ background: '#fff', padding: '16px', borderRadius: '16px', border: '2px solid #e2e8f0', marginTop: '8px' }}>
               <QRCodeCanvas 
-                value={`[DSU AI 수강비서]\n학번: ${studentId || '기본'}\n총 학점: ${totalCredits}학점\n\n[수강 목록]\n` + cart.map(item => `${item.course.title} (${item.course.schedule})`).join('\n')} 
+                value={`https://dsu-web-nav-vibe-code.vercel.app/?student_id=${studentId}`} 
                 size={200}
-                level={"H"}
+                level={"M"}
               />
             </div>
             <button onClick={() => setShowQrModal(false)} style={{ width: '100%', padding: '12px', background: '#f1f5f9', border: 'none', borderRadius: '12px', color: '#475569', fontWeight: 'bold', cursor: 'pointer', marginTop: '8px' }}>닫기</button>
