@@ -12,6 +12,10 @@ start "Frontend (React)" cmd /k "cd /d "%~dp0frontend" && npm run dev"
 
 echo ==========================================
 echo Both servers are launching in separate windows!
-echo You can close this window now.
+echo Opening browser in a moment...
 echo ==========================================
+timeout /t 3 /nobreak >nul
+start http://localhost:5173
+
+echo You can close this window now.
 pause

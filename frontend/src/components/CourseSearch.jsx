@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Plus, Search, Tag } from 'lucide-react';
 
 export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab = 'all' }) {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
   const [courses, setCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [activeTab, setActiveTab] = useState(initialTab); // 'all', 'major', 'general'
@@ -12,7 +13,7 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get('http://127.0.0.1:8000/courses?limit=3000');
+        const res = await axios.get(`${API_URL}/courses?limit=3000`);
         setCourses(res.data);
       } catch (err) {
         console.error(err);
@@ -76,7 +77,7 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
 
   const handleAdd = async (courseId) => {
     try {
-      await axios.post('http://127.0.0.1:8000/cart', {
+      await axios.post(`${API_URL}/cart`, {
         course_id: courseId,
         user_id: 1
       });

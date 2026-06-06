@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Send, Bot, User } from 'lucide-react';
 
 export default function Chatbot({ onUpdateCart }) {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
   const [messages, setMessages] = useState([
     { role: 'assistant', content: '안녕하세요! 수강신청 비서입니다. 무엇을 도와드릴까요? (예: "장바구니에 CS101 담아줘", "파이썬 관련 교양 추천해줘")' }
   ]);
@@ -24,7 +25,7 @@ export default function Chatbot({ onUpdateCart }) {
     setIsLoading(true);
 
     try {
-      const res = await axios.post('http://127.0.0.1:8000/chat', { message: userMsg });
+      const res = await axios.post(`${API_URL}/chat`, { message: userMsg });
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
       if (res.data.action_taken) {
         onUpdateCart();

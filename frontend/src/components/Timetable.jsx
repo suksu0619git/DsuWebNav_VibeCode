@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trash2, AlertTriangle, Calendar, Info } from 'lucide-react';
+import { Trash2, AlertTriangle, Calendar, Info, Share2, Users, Wand2, Building2, Sparkles, X, Copy, Check } from 'lucide-react';
 
 // 요일별 색상 팔레트 (에브리타임 스타일)
 const COURSE_COLORS = [
@@ -40,7 +40,6 @@ function parseSchedule(scheduleStr) {
 
 /**
  * 연속된 교시를 블록으로 묶기 (같은 요일에서)
- * [{day:'월', period:1}, {day:'월', period:2}] → [{day:'월', startPeriod:1, span:2}]
  */
 function groupToBlocks(slots) {
   const byDay = {};
@@ -69,8 +68,34 @@ function groupToBlocks(slots) {
 }
 
 export default function Timetable({ cart, onRemove, onSlotSelect }) {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
   const [hoveredCourse, setHoveredCourse] = useState(null);
   const [tooltip, setTooltip] = useState(null);
+
+  // 공유 및 비교 관련 상태
+  const [allCourses, setAllCourses] = useState([]);
+  const [friendCodeInput, setFriendCodeInput] = useState('');
+  const [friendCourses, setFriendCourses] = useState([]);
+  const [copiedShareCode, setCopiedShareCode] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // AI 시간표 자동 스케줄러 관련 상태
+  const [showAutoScheduler, setShowAutoScheduler] = useState(false);
+  const [constraints, setConstraints] = useState({
+    fridayFree: false,
+    noMorning: false,
+    lunchFree: false,
+    minCredits: 12,
+  });
+  const [generatedOptions, setGeneratedOptions] = useState([]);
+  const [hoveredOptionIdx, setHoveredOptionIdx] = useState(null);
+
+  // 모든 강의 목록 로드
+  useEffect(() => {
+    axios.get(`${API_URL}/courses?limit=3000`)
+      .then(res => setAllCourses(res.data))
+      .catch(err => console.error(err));
+  }, []);
 
   // 과목별 색상 할당
   const colorMap = {};
@@ -80,7 +105,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/cart/${id}`);
+      await axios.delete(`${API_URL}/cart/${id}`);
       onRemove();
     } catch (err) {
       console.error(err);
@@ -94,18 +119,157 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
     }
   };
 
-  // 시간표에 표시할 블록 생성
-  const timetableBlocks = cart.flatMap(item => {
+  // 내 시간표 공유 코드 생성 (과목 코드들의 쉼표 나열)
+  const myShareCode = cart.map(item => item.course.code).join(',');
+
+  const handleCopyShareCode = () => {
+    navigator.clipboard.writeText(myShareCode);
+    setCopiedShareCode(true);
+    setTimeout(() => setCopiedShareCode(false), 2000);
+  };
+
+  // 친구 시간표 적용
+  const handleApplyFriendCode = () => {
+    if (!friendCodeInput.trim()) {
+      setFriendCourses([]);
+      return;
+    }
+    const codes = friendCodeInput.split(',').map(c => c.trim().toUpperCase());
+    const matched = allCourses.filter(c => codes.includes(c.code.toUpperCase()));
+    setFriendCourses(matched);
+  };
+
+  // 친구 시간표 초기화
+  const handleClearFriend = () => {
+    setFriendCodeInput('');
+    setFriendCourses([]);
+  };
+
+  // AI 시간표 자동 생성 로직
+  const handleGenerateSchedules = () => {
+    let pool = allCourses.filter(c => {
+      const slots = parseSchedule(c.schedule);
+      if (constraints.fridayFree && slots.some(s => s.day === '금')) return false;
+      if (constraints.noMorning && slots.some(s => s.period === 1)) return false;
+      if (constraints.lunchFree && slots.some(s => s.period === 4)) return false;
+      return true;
+    });
+
+    const results = [];
+    const maxAttempts = 2000;
+
+    for (let attempt = 0; attempt < maxAttempts && results.length < 3; attempt++) {
+      const shuffled = [...pool].sort(() => Math.random() - 0.5);
+      const currentSelection = [];
+      let currentCredits = 0;
+
+      for (const course of shuffled) {
+        let hasConflict = false;
+        const cSlots = parseSchedule(course.schedule);
+
+        for (const selected of currentSelection) {
+          const sSlots = parseSchedule(selected.schedule);
+          const overlaps = cSlots.some(cs => sSlots.some(ss => ss.day === cs.day && ss.period === cs.period));
+          if (overlaps || selected.title === course.title) {
+            hasConflict = true;
+            break;
+          }
+        }
+
+        if (!hasConflict) {
+          currentSelection.push(course);
+          currentCredits += course.credits;
+
+          if (currentCredits >= constraints.minCredits && currentCredits <= 18) {
+            const sortedCodes = [...currentSelection].map(c => c.code).sort().join(',');
+            if (!results.some(r => r.codesKey === sortedCodes)) {
+              results.push({
+                courses: [...currentSelection],
+                credits: currentCredits,
+                codesKey: sortedCodes
+              });
+            }
+            if (results.length >= 3) break;
+          }
+        }
+      }
+    }
+    setGeneratedOptions(results);
+  };
+
+  // 자동 생성된 시간표 적용
+  const handleApplySchedule = async (selectedCourses) => {
+    if (!window.confirm("현재 장바구니에 담긴 과목들이 지워지고 AI 추천 시간표로 대체됩니다. 진행하시겠습니까?")) {
+      return;
+    }
+    try {
+      // 1. 기존 카트 비우기
+      for (const item of cart) {
+        await axios.delete(`${API_URL}/cart/${item.id}`);
+      }
+      // 2. 새 과목들 카트에 추가
+      for (const course of selectedCourses) {
+        await axios.post(`${API_URL}/cart`, {
+          course_id: course.id,
+          user_id: 1
+        });
+      }
+      onRemove(); // 카트 갱신 트리거
+      setShowAutoScheduler(false);
+      setGeneratedOptions([]);
+      alert('AI 시간표가 성공적으로 장바구니에 적용되었습니다!');
+    } catch (err) {
+      console.error(err);
+      alert('시간표 적용 과정에서 오류가 발생했습니다.');
+    }
+  };
+
+  // 시간표에 표시할 내 과목 블록 생성
+  const myTimetableBlocks = cart.flatMap(item => {
     const slots = parseSchedule(item.course.schedule);
     const blocks = groupToBlocks(slots);
     return blocks.map(block => ({
       ...block,
       item,
+      isFriend: false,
       color: colorMap[item.course.code],
     }));
   });
 
-  // 충돌 감지
+  // 시간표에 표시할 친구 과목 블록 생성 (공유 비교용)
+  const friendTimetableBlocks = friendCourses.flatMap(course => {
+    const slots = parseSchedule(course.schedule);
+    const blocks = groupToBlocks(slots);
+    return blocks.map(block => ({
+      ...block,
+      item: { course },
+      isFriend: true,
+      color: { bg: '#e2e8f0', border: '#94a3b8' } // 회색조 색상 지정
+    }));
+  });
+
+  // AI 시간표 미리보기용 블록 생성 (마우스 오버 시 일시적으로 시간표에 띄워줌)
+  const previewTimetableBlocks = (hoveredOptionIdx !== null && generatedOptions[hoveredOptionIdx])
+    ? generatedOptions[hoveredOptionIdx].courses.flatMap(course => {
+        const slots = parseSchedule(course.schedule);
+        const blocks = groupToBlocks(slots);
+        return blocks.map(block => ({
+          ...block,
+          item: { course },
+          isPreview: true,
+          color: { bg: '#a855f7', border: '#7e22ce' } // 보라색 프리뷰
+        }));
+      })
+    : [];
+
+  // 세 종류의 블록들 통합
+  const allTimetableBlocks = [
+    ...myTimetableBlocks,
+    ...friendTimetableBlocks,
+    ...previewTimetableBlocks
+  ];
+
+  // 충돌 감지 (내 장바구니 기준)
   const conflicts = [];
   const occupied = {}; // key: "day-period" → courseCode
   cart.forEach(item => {
@@ -118,6 +282,40 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
     });
   });
 
+  // 캠퍼스 연강 동선 경고 계산
+  const transitWarnings = [];
+  const buildingMap = {}; // key: "day-period" → { building, courseTitle, location }
+
+  cart.forEach(item => {
+    const slots = parseSchedule(item.course.schedule);
+    slots.forEach(({ day, period }) => {
+      // 건물명 파싱 (예: "공학관 301호" -> "공학관")
+      const building = item.course.location.split(' ')[0] || '';
+      buildingMap[`${day}-${period}`] = { building, title: item.course.title, location: item.course.location };
+    });
+  });
+
+  DAYS.forEach(day => {
+    for (let p = 1; p < 9; p++) {
+      const current = buildingMap[`${day}-${p}`];
+      const next = buildingMap[`${day}-${p + 1}`];
+      if (current && next && current.title !== next.title) {
+        if (current.building && next.building && current.building !== next.building) {
+          transitWarnings.push({
+            day,
+            periods: `${p}교시 → ${p + 1}교시`,
+            from: current.building,
+            to: next.building,
+            courseFrom: current.title,
+            courseTo: next.title,
+            locFrom: current.location,
+            locTo: next.location
+          });
+        }
+      }
+    }
+  });
+
   const totalCredits = cart.reduce((sum, item) => sum + (item.course.credits || 0), 0);
 
   return (
@@ -128,19 +326,61 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
         <div>
           <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Calendar size={22} color="#6366f1" />
-            내 시간표
+            내 시간표 및 빌더
           </h2>
           <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>
-            장바구니에 담긴 {cart.length}개 과목 · 총 {totalCredits}학점
+            장바구니 {cart.length}개 과목 · 총 {totalCredits}학점 {friendCourses.length > 0 && `(친구 시간표 오버레이 활성화)`}
           </p>
         </div>
-        {conflicts.length > 0 && (
-          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', color: '#f87171', fontSize: '13px' }}>
-            <AlertTriangle size={15} />
-            시간 충돌 {conflicts.length}건 감지됨
-          </div>
-        )}
+        
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {/* AI 시간표 자동 빌더 버튼 */}
+          <button
+            onClick={() => { setShowAutoScheduler(!showAutoScheduler); setShowShareModal(false); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
+              background: showAutoScheduler ? '#6366f1' : '#1e293b', border: `1px solid ${showAutoScheduler ? '#818cf8' : '#334155'}`,
+              color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
+            }}
+          >
+            <Wand2 size={15} color={showAutoScheduler ? '#fff' : '#818cf8'} />
+            AI 자동 시간표 빌더
+          </button>
+
+          {/* 친구 시간표 비교 버튼 */}
+          <button
+            onClick={() => { setShowShareModal(!showShareModal); setShowAutoScheduler(false); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
+              background: showShareModal ? '#0ea5e9' : '#1e293b', border: `1px solid ${showShareModal ? '#38bdf8' : '#334155'}`,
+              color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
+            }}
+          >
+            <Users size={15} color={showShareModal ? '#fff' : '#38bdf8'} />
+            친구 시간표 공유 & 비교
+          </button>
+        </div>
       </div>
+
+      {/* 상단 알림 메시지 영역 (시간 충돌 및 이동 동선 경고) */}
+      {(conflicts.length > 0 || transitWarnings.length > 0) && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
+          {conflicts.length > 0 && (
+            <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', color: '#f87171', fontSize: '13px' }}>
+              <AlertTriangle size={16} />
+              <span><strong>시간표 겹침 경고:</strong> 동일한 요일/교시에 겹치는 강의가 있습니다. 장바구니 항목을 확인하세요.</span>
+            </div>
+          )}
+          {transitWarnings.map((warn, index) => (
+            <div key={index} style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '10px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', color: '#fbbf24', fontSize: '13px' }}>
+              <Building2 size={16} />
+              <span>
+                <strong>연강 동선 경고:</strong> {warn.day}요일 {warn.periods} 연강 시 <strong>{warn.courseFrom} ({warn.locFrom})</strong> → <strong>{warn.courseTo} ({warn.locTo})</strong> 건물 간 이동이 필요해 시간이 촉박할 수 있습니다!
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 메인 레이아웃 */}
       <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
@@ -201,12 +441,28 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
               {/* 과목 블록 오버레이 (절대 위치) */}
               <div style={{ position: 'absolute', top: 0, left: '52px', right: 0, bottom: 0, pointerEvents: 'none', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)' }}>
                 {DAYS.map((day, dayIdx) => (
-                  <div key={day} style={{ position: 'relative', borderLeft: dayIdx === 0 ? 'none' : '1px solid transparent' }}>
-                    {timetableBlocks.filter(b => b.day === day).map((block, i) => {
+                  <div key={day} style={{ position: 'relative' }}>
+                    {allTimetableBlocks.filter(b => b.day === day).map((block, i) => {
                       const top = (block.startPeriod - 1) * 64;
                       const height = block.span * 64 - 3;
                       const isHovered = hoveredCourse === block.item.course.code;
-                      const conflict = conflicts.some(c => c.day === day && c.period >= block.startPeriod && c.period < block.startPeriod + block.span);
+                      const conflict = !block.isFriend && !block.isPreview && conflicts.some(c => c.day === day && c.period >= block.startPeriod && c.period < block.startPeriod + block.span);
+                      
+                      let bgStyle = block.color.bg;
+                      let borderStyle = 'none';
+                      let opacityStyle = 1;
+                      
+                      if (block.isFriend) {
+                        // 친구 시간표 블록 스타일 (사선 무늬 오버레이)
+                        bgStyle = 'repeating-linear-gradient(45deg, rgba(148,163,184,0.1), rgba(148,163,184,0.1) 8px, rgba(148,163,184,0.2) 8px, rgba(148,163,184,0.2) 16px)';
+                        borderStyle = '2px dashed #94a3b8';
+                        opacityStyle = 0.9;
+                      } else if (block.isPreview) {
+                        // AI 프리뷰 블록 스타일 (보라색 번쩍임)
+                        bgStyle = 'repeating-linear-gradient(45deg, rgba(168,85,247,0.2), rgba(168,85,247,0.2) 8px, rgba(168,85,247,0.45) 8px, rgba(168,85,247,0.45) 16px)';
+                        borderStyle = '2px dashed #a855f7';
+                      }
+
                       return (
                         <div
                           key={i}
@@ -216,9 +472,11 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                             left: '3px',
                             right: '3px',
                             height: `${height}px`,
-                            background: conflict ? 'rgba(239,68,68,0.85)' : block.color.bg,
+                            background: conflict ? 'rgba(239,68,68,0.85)' : bgStyle,
+                            border: borderStyle,
+                            opacity: opacityStyle,
                             borderRadius: '8px',
-                            boxShadow: isHovered ? `0 4px 20px ${block.color.bg}80` : '0 2px 8px rgba(0,0,0,0.3)',
+                            boxShadow: isHovered ? `0 4px 20px ${block.isPreview ? '#a855f7' : block.isFriend ? '#94a3b8' : block.color.bg}80` : '0 2px 8px rgba(0,0,0,0.3)',
                             padding: '6px 8px',
                             display: 'flex',
                             flexDirection: 'column',
@@ -228,7 +486,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                             pointerEvents: 'all',
                             transition: 'transform 0.15s, box-shadow 0.15s',
                             transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-                            zIndex: isHovered ? 10 : 1,
+                            zIndex: isHovered ? 10 : (block.isFriend || block.isPreview ? 2 : 5),
                             overflow: 'hidden',
                           }}
                           onMouseEnter={() => setHoveredCourse(block.item.course.code)}
@@ -238,14 +496,13 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                             setTooltip(tooltip?.code === block.item.course.code ? null : { ...block.item.course, dayIdx, startPeriod: block.startPeriod });
                           }}
                         >
+                          <div style={{ fontSize: '11px', fontWeight: 800, color: block.isFriend ? '#94a3b8' : block.isPreview ? '#d8b4fe' : '#fff', opacity: 0.8 }}>
+                            {block.isFriend ? '[친구] ' : block.isPreview ? '[추천] ' : ''}
+                            {block.item.course.code}
+                          </div>
                           <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {block.item.course.title}
                           </div>
-                          {block.span >= 2 && (
-                            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {block.item.course.professor}
-                            </div>
-                          )}
                           {block.span >= 2 && (
                             <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {block.item.course.location}
@@ -261,19 +518,170 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
           </div>
         </div>
 
-        {/* 오른쪽: 장바구니 목록 */}
-        <div style={{ width: '260px', display: 'flex', flexDirection: 'column', gap: '12px', flexShrink: 0 }}>
+        {/* 오른쪽: 패널 관리 (일반 장바구니 / AI 자동빌더 / 친구 공유) */}
+        <div style={{ width: '280px', display: 'flex', flexDirection: 'column', gap: '12px', flexShrink: 0 }}>
           
-          {/* 학점 요약 */}
+          {/* 1. 친구 비교 패널 */}
+          {showShareModal && (
+            <div style={{ background: '#1e293b', border: '1px solid #0ea5e9', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#0ea5e9', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Users size={16} /> 친구 시간표 대조
+                </span>
+                <button onClick={() => setShowShareModal(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={16} /></button>
+              </div>
+              
+              {/* 내 공유 코드 복사 */}
+              <div>
+                <label style={{ fontSize: '11px', color: '#64748b' }}>내 시간표 공유 코드</label>
+                <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                  <input
+                    type="text"
+                    readOnly
+                    value={myShareCode || '과목을 담아주세요.'}
+                    style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', color: '#94a3b8', outline: 'none' }}
+                  />
+                  <button
+                    onClick={handleCopyShareCode}
+                    style={{ background: '#0ea5e9', border: 'none', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    {copiedShareCode ? <Check size={14} color="#fff" /> : <Copy size={14} color="#fff" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* 친구 공유 코드 입력 */}
+              <div>
+                <label style={{ fontSize: '11px', color: '#64748b' }}>친구의 코드 입력</label>
+                <textarea
+                  placeholder="예: CS101,CS202"
+                  value={friendCodeInput}
+                  onChange={e => setFriendCodeInput(e.target.value)}
+                  style={{ width: '100%', height: '50px', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '6px', fontSize: '12px', color: '#fff', resize: 'none', marginTop: '4px', outline: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  onClick={handleApplyFriendCode}
+                  style={{ flex: 1, background: '#0ea5e9', border: 'none', borderRadius: '6px', padding: '6px', fontSize: '12px', fontWeight: 600, color: '#fff', cursor: 'pointer' }}
+                >
+                  비교 오버레이 켜기
+                </button>
+                {friendCourses.length > 0 && (
+                  <button
+                    onClick={handleClearFriend}
+                    style={{ background: '#334155', border: 'none', borderRadius: '6px', padding: '6px 10px', fontSize: '12px', color: '#94a3b8', cursor: 'pointer' }}
+                  >
+                    초기화
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 2. AI 시간표 자동 빌더 패널 */}
+          {showAutoScheduler && (
+            <div style={{ background: '#1e293b', border: '1px solid #6366f1', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#818cf8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Sparkles size={16} /> AI 자동 조합 스케줄러
+                </span>
+                <button onClick={() => setShowAutoScheduler(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={16} /></button>
+              </div>
+
+              {/* 제약조건 */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#f1f5f9', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={constraints.fridayFree}
+                    onChange={e => setConstraints({ ...constraints, fridayFree: e.target.checked })}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  금요일 공강 만들기 (주4일)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#f1f5f9', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={constraints.noMorning}
+                    onChange={e => setConstraints({ ...constraints, noMorning: e.target.checked })}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  1교시 아침수업 제외 (09:00~)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#f1f5f9', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={constraints.lunchFree}
+                    onChange={e => setConstraints({ ...constraints, lunchFree: e.target.checked })}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  점심시간 보장 (12~13시 비우기)
+                </label>
+                
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>최소 이수 학점</span>
+                  <select
+                    value={constraints.minCredits}
+                    onChange={e => setConstraints({ ...constraints, minCredits: parseInt(e.target.value) })}
+                    style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '4px', padding: '2px 4px', fontSize: '11px', color: '#fff' }}
+                  >
+                    <option value={9}>9학점 이상</option>
+                    <option value={12}>12학점 이상</option>
+                    <option value={15}>15학점 이상</option>
+                  </select>
+                </div>
+              </div>
+
+              <button
+                onClick={handleGenerateSchedules}
+                style={{ background: '#6366f1', border: 'none', borderRadius: '6px', padding: '8px', fontSize: '12px', fontWeight: 600, color: '#fff', cursor: 'pointer', transition: 'background 0.15s' }}
+              >
+                시간표 최적 조합 생성
+              </button>
+
+              {/* 생성된 결과 */}
+              {generatedOptions.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '140px', overflowY: 'auto', marginTop: '4px', borderTop: '1px solid #334155', paddingTop: '8px' }}>
+                  <div style={{ fontSize: '11px', color: '#64748b' }}>추천 시안 (마우스오버 시 미리보기)</div>
+                  {generatedOptions.map((opt, idx) => (
+                    <div
+                      key={idx}
+                      onMouseEnter={() => setHoveredOptionIdx(idx)}
+                      onMouseLeave={() => setHoveredOptionIdx(null)}
+                      style={{
+                        background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '8px',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'border 0.15s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#f1f5f9' }}>시안 {idx + 1} ({opt.credits}학점)</span>
+                        <span style={{ fontSize: '10px', color: '#64748b' }}>과목 {opt.courses.length}개 조합</span>
+                      </div>
+                      <button
+                        onClick={() => handleApplySchedule(opt.courses)}
+                        style={{ background: '#10b981', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '10px', fontWeight: 700, color: '#fff', cursor: 'pointer' }}
+                      >
+                        담기
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 3. 기본 학점 요약 대시보드 */}
           <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: '12px', padding: '14px', color: '#fff' }}>
-            <div style={{ fontSize: '12px', opacity: 0.85, marginBottom: '4px' }}>신청 학점</div>
+            <div style={{ fontSize: '12px', opacity: 0.85, marginBottom: '4px' }}>이번 학기 예정 학점</div>
             <div style={{ fontSize: '28px', fontWeight: 800 }}>{totalCredits}<span style={{ fontSize: '14px', fontWeight: 400, opacity: 0.8 }}>학점</span></div>
-            <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '4px' }}>{cart.length}개 과목 선택됨</div>
+            <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '4px' }}>장바구니에 {cart.length}개 과목 담김</div>
           </div>
 
-          {/* 과목 목록 */}
+          {/* 4. 장바구니 리스트 */}
           <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', paddingLeft: '2px' }}>장바구니 ({cart.length})</div>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', paddingLeft: '2px' }}>장바구니 목록 ({cart.length})</div>
             
             {cart.length === 0 && (
               <div style={{ background: '#1e293b', borderRadius: '12px', padding: '24px', textAlign: 'center', color: '#475569', fontSize: '13px', border: '1px dashed #334155' }}>
@@ -368,7 +776,22 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <span style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '15px' }}>{tooltip.title}</span>
-            <span style={{ fontSize: '12px', color: colorMap[tooltip.code]?.bg, background: `${colorMap[tooltip.code]?.bg}22`, padding: '2px 8px', borderRadius: '6px' }}>{tooltip.credits}학점</span>
+            <span style={{ fontSize: '12px', color: colorMap[tooltip.code]?.bg || '#6366f1', background: `${colorMap[tooltip.code]?.bg || '#6366f1'}22`, padding: '2px 8px', borderRadius: '6px' }}>{tooltip.credits}학점</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '12px', color: '#94a3b8' }}>
+            <div>📚 {tooltip.code}</div>
+            <div>👨‍🏫 {tooltip.professor}</div>
+            <div>⏰ {tooltip.schedule}</div>
+            <div>📍 {tooltip.location}</div>
+            <div>🏷️ {tooltip.category}</div>
+          </div>
+          <div style={{ marginTop: '8px', fontSize: '11px', color: '#475569', textAlign: 'center' }}>클릭하여 닫기</div>
+        </div>
+      )}
+    </div>
+  );
+}
+Radius: '6px' }}>{tooltip.credits}학점</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '12px', color: '#94a3b8' }}>
             <div>📚 {tooltip.code}</div>

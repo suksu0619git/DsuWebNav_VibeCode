@@ -11,10 +11,12 @@ function App() {
   const [cart, setCart] = useState([]);
   const [initialSearchTerm, setInitialSearchTerm] = useState('');
   const [initialSearchTab, setInitialSearchTab] = useState('all');
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
   
   const fetchCart = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/cart');
+      const res = await axios.get(`${API_URL}/cart`);
       setCart(res.data);
     } catch (err) {
       console.error(err);
@@ -70,13 +72,29 @@ function App() {
           {activeTab === 'credits' && <CreditDashboard cart={cart} />}
         </div>
         
-        <div className="w-96 bg-surface rounded-2xl shadow-xl border border-slate-700 flex flex-col relative z-0">
-          <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-2 font-semibold">
-            <MessageSquare className="text-accent" size={20} />
-            AI 수강 비서
+        {/* Floating AI Chatbot Button */}
+        <button
+          onClick={() => setIsChatbotOpen(!isChatbotOpen)}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-accent hover:bg-accent/80 text-white rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-110 z-50"
+        >
+          {isChatbotOpen ? <span className="text-2xl font-bold">×</span> : <MessageSquare size={28} />}
+        </button>
+
+        {/* Floating Chat Window */}
+        {isChatbotOpen && (
+          <div className="fixed bottom-24 right-6 w-96 h-[600px] bg-surface rounded-2xl shadow-2xl border border-slate-700 flex flex-col z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-5">
+            <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex items-center justify-between font-semibold">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="text-accent" size={20} />
+                AI 수강 비서
+              </div>
+              <button onClick={() => setIsChatbotOpen(false)} className="text-slate-400 hover:text-white text-xl">
+                ×
+              </button>
+            </div>
+            <Chatbot onUpdateCart={fetchCart} />
           </div>
-          <Chatbot onUpdateCart={fetchCart} />
-        </div>
+        )}
       </main>
     </div>
   );
