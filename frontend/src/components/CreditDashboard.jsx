@@ -154,30 +154,30 @@ export default function CreditDashboard({ studentId, cart }) {
             <div>
               <div className="flex justify-between mb-2">
                 <span className="font-semibold text-slate-600">전공 필수</span>
-                <span className="text-sm font-bold text-blue-600">잔여: {remMajorReq}학점</span>
+                <span className="text-sm font-bold text-red-600">잔여: {remMajorReq}학점</span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-3">
-                <div className="bg-blue-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, (earnedMajorReq/reqMajorReq)*100)}%` }}></div>
+                <div className="bg-red-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, (earnedMajorReq/reqMajorReq)*100)}%` }}></div>
               </div>
             </div>
             
             <div>
               <div className="flex justify-between mb-2">
                 <span className="font-semibold text-slate-600">전공 선택</span>
-                <span className="text-sm font-bold text-purple-600">잔여: {remMajorEle}학점</span>
+                <span className="text-sm font-bold text-rose-600">잔여: {remMajorEle}학점</span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-3">
-                <div className="bg-purple-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, (earnedMajorEle/reqMajorEle)*100)}%` }}></div>
+                <div className="bg-rose-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, (earnedMajorEle/reqMajorEle)*100)}%` }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between mb-2">
                 <span className="font-semibold text-slate-600">교양 필수/선택</span>
-                <span className="text-sm font-bold text-emerald-600">잔여: {remGeneral}학점</span>
+                <span className="text-sm font-bold text-orange-600">잔여: {remGeneral}학점</span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-3">
-                <div className="bg-emerald-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, (earnedGeneral/reqGeneral)*100)}%` }}></div>
+                <div className="bg-orange-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, (earnedGeneral/reqGeneral)*100)}%` }}></div>
               </div>
             </div>
           </div>

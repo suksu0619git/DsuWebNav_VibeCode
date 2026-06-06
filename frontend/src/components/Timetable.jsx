@@ -4,16 +4,16 @@ import { Trash2, AlertTriangle, Calendar, Info, Share2, Users, Wand2, Building2,
 import html2canvas from 'html2canvas';
 import { QRCodeCanvas } from 'qrcode.react';
 
-// 요일별 색상 팔레트 (에브리타임 스타일)
+// 요일별 색상 팔레트 (붉은 테마와 어울리는 프로페셔널 톤: 레드, 차콜, 버건디, 스톤 등)
 const COURSE_COLORS = [
-  { bg: '#4a90d9', light: '#e8f1fb', border: '#3a7bc8' },
-  { bg: '#e8734a', light: '#fdf0eb', border: '#d4623b' },
-  { bg: '#5cb85c', light: '#eaf6ea', border: '#4aa84a' },
-  { bg: '#9b59b6', light: '#f3eaf9', border: '#8b49a6' },
-  { bg: '#e91e8c', light: '#fce4f3', border: '#d40e7c' },
-  { bg: '#00bcd4', light: '#e0f7fa', border: '#00acc1' },
-  { bg: '#ff9800', light: '#fff3e0', border: '#f57c00' },
-  { bg: '#795548', light: '#efebe9', border: '#6d4c41' },
+  { bg: '#d22c2a', light: '#fef2f2', border: '#b91c1c' }, // 메인 레드
+  { bg: '#475569', light: '#f8fafc', border: '#334155' }, // 슬레이트 (대비)
+  { bg: '#9f1239', light: '#fff1f2', border: '#881337' }, // 버건디
+  { bg: '#57534e', light: '#fafaf9', border: '#44403c' }, // 웜그레이
+  { bg: '#be123c', light: '#ffe4e6', border: '#9f1239' }, // 로즈 레드
+  { bg: '#3f3f46', light: '#f4f4f5', border: '#27272a' }, // 차콜
+  { bg: '#c2410c', light: '#fff7ed', border: '#9a3412' }, // 테라코타
+  { bg: '#78716c', light: '#f5f5f4', border: '#57534e' }, // 스톤
 ];
 
 const DAYS = ['월', '화', '수', '목', '금'];
@@ -364,7 +364,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
                 textAlign: 'center',
                 fontSize: '14px',
                 fontWeight: 700,
-                color: day === '월' ? '#6366f1' : day === '수' ? '#22d3ee' : day === '금' ? '#f472b6' : '#94a3b8',
+                color: '#475569',
                 borderLeft: '1px solid #e2e8f0'
               }}>
                 {day}
@@ -435,7 +435,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center shrink-0 gap-3">
         <div>
           <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Calendar size={22} color="#6366f1" />
+            <Calendar size={22} color="#d22c2a" />
             내 시간표 및 빌더
           </h2>
           <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>
@@ -449,11 +449,11 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
             onClick={() => { setShowAutoScheduler(!showAutoScheduler); setShowShareModal(false); }}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
-              background: showAutoScheduler ? '#6366f1' : '#ffffff', border: `1px solid ${showAutoScheduler ? '#818cf8' : '#e2e8f0'}`,
-              color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
+              background: showAutoScheduler ? '#d22c2a' : '#ffffff', border: `1px solid ${showAutoScheduler ? '#b91c1c' : '#e2e8f0'}`,
+              color: showAutoScheduler ? '#fff' : '#d22c2a', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
             }}
           >
-            <Wand2 size={15} color={showAutoScheduler ? '#fff' : '#818cf8'} />
+            <Wand2 size={15} />
             AI 자동 시간표 빌더
           </button>
 
@@ -462,11 +462,11 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
             onClick={() => { setShowShareModal(!showShareModal); setShowAutoScheduler(false); }}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
-              background: showShareModal ? '#0ea5e9' : '#ffffff', border: `1px solid ${showShareModal ? '#38bdf8' : '#e2e8f0'}`,
-              color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
+              background: showShareModal ? '#475569' : '#ffffff', border: `1px solid ${showShareModal ? '#334155' : '#e2e8f0'}`,
+              color: showShareModal ? '#fff' : '#475569', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
             }}
           >
-            <Users size={15} color={showShareModal ? '#fff' : '#38bdf8'} />
+            <Users size={15} />
             공유 & 비교
           </button>
 
@@ -475,7 +475,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
             onClick={handleDownloadImage}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
-              background: '#10b981', border: '1px solid #059669',
+              background: '#57534e', border: '1px solid #44403c',
               color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
             }}
           >
@@ -488,7 +488,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
             onClick={() => setShowQrModal(true)}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
-              background: '#f59e0b', border: '1px solid #d97706',
+              background: '#78716c', border: '1px solid #57534e',
               color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
             }}
           >
@@ -540,7 +540,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
                 textAlign: 'center',
                 fontSize: '14px',
                 fontWeight: 700,
-                color: day === '월' ? '#6366f1' : day === '수' ? '#22d3ee' : day === '금' ? '#f472b6' : '#94a3b8',
+                color: '#475569',
                 borderLeft: '1px solid #e2e8f0'
               }}>
                 {day}
@@ -597,13 +597,13 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
                       
                       if (block.isFriend) {
                         // 친구 시간표 블록 스타일 (사선 무늬 오버레이)
-                        bgStyle = 'repeating-linear-gradient(45deg, rgba(148,163,184,0.1), rgba(148,163,184,0.1) 8px, rgba(148,163,184,0.2) 8px, rgba(148,163,184,0.2) 16px)';
-                        borderStyle = '2px dashed #94a3b8';
+                        bgStyle = 'repeating-linear-gradient(45deg, rgba(71,85,105,0.1), rgba(71,85,105,0.1) 8px, rgba(71,85,105,0.2) 8px, rgba(71,85,105,0.2) 16px)';
+                        borderStyle = '2px dashed #475569';
                         opacityStyle = 0.9;
                       } else if (block.isPreview) {
-                        // AI 프리뷰 블록 스타일 (보라색 번쩍임)
-                        bgStyle = 'repeating-linear-gradient(45deg, rgba(168,85,247,0.2), rgba(168,85,247,0.2) 8px, rgba(168,85,247,0.45) 8px, rgba(168,85,247,0.45) 16px)';
-                        borderStyle = '2px dashed #a855f7';
+                        // AI 프리뷰 블록 스타일 (로즈레드 번쩍임)
+                        bgStyle = 'repeating-linear-gradient(45deg, rgba(190,18,60,0.2), rgba(190,18,60,0.2) 8px, rgba(190,18,60,0.45) 8px, rgba(190,18,60,0.45) 16px)';
+                        borderStyle = '2px dashed #be123c';
                       }
 
                       return (
@@ -619,7 +619,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
                             border: borderStyle,
                             opacity: opacityStyle,
                             borderRadius: '8px',
-                            boxShadow: isHovered ? `0 4px 20px ${block.isPreview ? '#a855f7' : block.isFriend ? '#94a3b8' : block.color.bg}80` : '0 2px 8px rgba(0,0,0,0.3)',
+                            boxShadow: isHovered ? `0 4px 20px ${block.isPreview ? '#be123c' : block.isFriend ? '#475569' : block.color.bg}80` : '0 2px 8px rgba(0,0,0,0.3)',
                             padding: '6px 8px',
                             display: 'flex',
                             flexDirection: 'column',
@@ -639,7 +639,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
                             setTooltip(tooltip?.code === block.item.course.code ? null : { ...block.item.course, dayIdx, startPeriod: block.startPeriod });
                           }}
                         >
-                          <div style={{ fontSize: '11px', fontWeight: 800, color: block.isFriend ? '#94a3b8' : block.isPreview ? '#d8b4fe' : '#fff', opacity: 0.8 }}>
+                          <div style={{ fontSize: '11px', fontWeight: 800, color: block.isFriend ? '#475569' : block.isPreview ? '#fbcfe8' : '#fff', opacity: 0.8 }}>
                             {block.isFriend ? '[친구] ' : block.isPreview ? '[추천] ' : ''}
                             {block.item.course.code}
                           </div>
@@ -668,9 +668,9 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
           
           {/* 1. 친구 비교 패널 */}
           {showShareModal && (
-            <div style={{ background: '#ffffff', border: '1px solid #0ea5e9', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #475569', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: '#0ea5e9', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Users size={16} /> 친구 시간표 대조
                 </span>
                 <button onClick={() => setShowShareModal(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={16} /></button>
@@ -688,7 +688,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
                   />
                   <button
                     onClick={handleCopyShareCode}
-                    style={{ background: '#0ea5e9', border: 'none', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ background: '#475569', border: 'none', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     {copiedShareCode ? <Check size={14} color="#fff" /> : <Copy size={14} color="#fff" />}
                   </button>
@@ -709,7 +709,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
               <div style={{ display: 'flex', gap: '6px' }}>
                 <button
                   onClick={handleApplyFriendCode}
-                  style={{ flex: 1, background: '#0ea5e9', border: 'none', borderRadius: '6px', padding: '6px', fontSize: '12px', fontWeight: 600, color: '#fff', cursor: 'pointer' }}
+                  style={{ flex: 1, background: '#475569', border: 'none', borderRadius: '6px', padding: '6px', fontSize: '12px', fontWeight: 600, color: '#fff', cursor: 'pointer' }}
                 >
                   비교 오버레이 켜기
                 </button>
@@ -727,9 +727,9 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
 
           {/* 2. AI 시간표 자동 빌더 패널 */}
           {showAutoScheduler && (
-            <div style={{ background: '#ffffff', border: '1px solid #6366f1', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #d22c2a', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: '#818cf8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#d22c2a', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Sparkles size={16} /> AI 자동 조합 스케줄러
                 </span>
                 <button onClick={() => setShowAutoScheduler(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={16} /></button>
@@ -781,7 +781,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
 
               <button
                 onClick={handleGenerateSchedules}
-                style={{ background: '#6366f1', border: 'none', borderRadius: '6px', padding: '8px', fontSize: '12px', fontWeight: 600, color: '#fff', cursor: 'pointer', transition: 'background 0.15s' }}
+                style={{ background: '#d22c2a', border: 'none', borderRadius: '6px', padding: '8px', fontSize: '12px', fontWeight: 600, color: '#fff', cursor: 'pointer', transition: 'background 0.15s' }}
               >
                 시간표 최적 조합 생성
               </button>
@@ -806,9 +806,9 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
                       </div>
                       <button
                         onClick={() => handleApplySchedule(opt.courses)}
-                        style={{ background: '#10b981', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '10px', fontWeight: 700, color: '#fff', cursor: 'pointer' }}
+                        style={{ background: '#d22c2a', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '10px', fontWeight: 700, color: '#fff', cursor: 'pointer' }}
                       >
-                        담기
+                        적용
                       </button>
                     </div>
                   ))}
@@ -817,8 +817,8 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
             </div>
           )}
 
-          {/* 3. 기본 학점 요약 대시보드 */}
-          <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: '12px', padding: '14px', color: '#fff' }}>
+          {/* 3. 장바구니 목록 패널 */}
+          <div style={{ background: 'linear-gradient(135deg, #d22c2a, #9f1239)', borderRadius: '12px', padding: '14px', color: '#fff' }}>
             <div style={{ fontSize: '12px', opacity: 0.85, marginBottom: '4px' }}>이번 학기 예정 학점</div>
             <div style={{ fontSize: '28px', fontWeight: 800 }}>{totalCredits}<span style={{ fontSize: '14px', fontWeight: 400, opacity: 0.8 }}>학점</span></div>
             <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '4px' }}>장바구니에 {cart.length}개 과목 담김</div>

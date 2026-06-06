@@ -15,6 +15,7 @@ class Course(Base):
     location = Column(String)
     schedule = Column(String)
     is_pn_eligible = Column(Integer, default=0) # Boolean (0 or 1) for SQLite
+    syllabus = Column(String, nullable=True)
 
 class CartItem(Base):
     __tablename__ = "cart"

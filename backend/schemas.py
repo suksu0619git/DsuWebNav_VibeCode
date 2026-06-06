@@ -11,6 +11,7 @@ class CourseBase(BaseModel):
     location: str
     schedule: str
     is_pn_eligible: bool = False
+    syllabus: Optional[str] = None
 
 class CourseCreate(CourseBase):
     pass
