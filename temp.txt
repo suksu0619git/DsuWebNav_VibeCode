@@ -659,8 +659,6 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
               </div>
             </div>
           </div>
-            </div>
-          </div>
         </div>
 
         {/* 오른쪽: 패널 관리 (일반 장바구니 / AI 자동빌더 / 친구 공유) */}
