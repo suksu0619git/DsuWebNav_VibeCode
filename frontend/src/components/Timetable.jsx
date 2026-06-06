@@ -349,10 +349,10 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect }) {
   const totalCredits = cart.reduce((sum, item) => sum + (item.course.credits || 0), 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '20px', gap: '16px', background: '#f8fafc', minHeight: 0 }}>
+    <div className="flex flex-col h-full p-4 md:p-5 gap-4 bg-slate-50 min-h-0 overflow-y-auto lg:overflow-hidden">
       
       {/* 헤더 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center shrink-0 gap-3">
         <div>
           <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Calendar size={22} color="#6366f1" />
@@ -363,7 +363,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect }) {
           </p>
         </div>
         
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="flex flex-wrap gap-2">
           {/* AI 시간표 자동 빌더 버튼 */}
           <button
             onClick={() => { setShowAutoScheduler(!showAutoScheduler); setShowShareModal(false); }}
@@ -439,10 +439,12 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect }) {
       )}
 
       {/* 메인 레이아웃 */}
-      <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
 
         {/* 왼쪽: 시간표 그리드 (캡처 대상 영역) */}
-        <div ref={timetableRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+        <div ref={timetableRef} className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden relative">
+          <div className="overflow-x-auto flex-1 flex flex-col">
+            <div style={{ minWidth: '600px', display: 'flex', flexDirection: 'column', flex: 1 }}>
           
           {/* 캡처 시 표시할 헤더 정보 (평소엔 숨기거나 작게 표시) */}
           <div style={{ display: 'none' }} className="print-header">
@@ -580,7 +582,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect }) {
         </div>
 
         {/* 오른쪽: 패널 관리 (일반 장바구니 / AI 자동빌더 / 친구 공유) */}
-        <div style={{ width: '280px', display: 'flex', flexDirection: 'column', gap: '12px', flexShrink: 0 }}>
+        <div className="w-full lg:w-[280px] flex flex-col gap-3 shrink-0 mb-8 lg:mb-0">
           
           {/* 1. 친구 비교 패널 */}
           {showShareModal && (
