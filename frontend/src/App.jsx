@@ -12,7 +12,7 @@ function App() {
   const [initialSearchTerm, setInitialSearchTerm] = useState('');
   const [initialSearchTab, setInitialSearchTab] = useState('all');
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+  const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   
   const fetchCart = async () => {
     try {
@@ -35,8 +35,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-slate-200 flex flex-col font-sans pt-20">
-      <header className="fixed top-0 left-0 right-0 bg-surface/80 backdrop-blur-md border-b border-slate-700 px-6 py-4 shadow-lg z-50 transition-all">
+    <div className="min-h-screen bg-slate-50 text-slate-700 flex flex-col font-sans pt-20">
+      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 shadow-lg z-50 transition-all">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3 text-primary font-extrabold text-2xl tracking-tight">
             <BookOpen size={28} className="text-accent" />
@@ -45,19 +45,19 @@ function App() {
           <nav className="flex gap-2">
             <button 
               onClick={() => setActiveTab('search')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${activeTab === 'search' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${activeTab === 'search' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:text-white hover:bg-white'}`}
             >
               <Search size={18} /> 강의 검색
             </button>
             <button 
               onClick={() => setActiveTab('timetable')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${activeTab === 'timetable' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${activeTab === 'timetable' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:text-white hover:bg-white'}`}
             >
               <Calendar size={18} /> 시간표/장바구니
             </button>
             <button 
               onClick={() => setActiveTab('credits')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${activeTab === 'credits' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${activeTab === 'credits' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:text-white hover:bg-white'}`}
             >
               <Clock size={18} /> 학점 관리
             </button>
@@ -66,7 +66,7 @@ function App() {
       </header>
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 flex gap-6 relative">
-        <div className="flex-1 bg-surface rounded-2xl shadow-xl border border-slate-700 overflow-hidden flex flex-col relative z-0">
+        <div className="flex-1 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative z-0">
           {activeTab === 'search' && <CourseSearch onAdd={() => fetchCart()} initialSearchTerm={initialSearchTerm} initialTab={initialSearchTab} />}
           {activeTab === 'timetable' && <Timetable cart={cart} onRemove={() => fetchCart()} onSlotSelect={handleSlotSelect} />}
           {activeTab === 'credits' && <CreditDashboard cart={cart} />}
@@ -82,13 +82,13 @@ function App() {
 
         {/* Floating Chat Window */}
         {isChatbotOpen && (
-          <div className="fixed bottom-24 right-6 w-96 h-[600px] bg-surface rounded-2xl shadow-2xl border border-slate-700 flex flex-col z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-5">
-            <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex items-center justify-between font-semibold">
+          <div className="fixed bottom-24 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-5">
+            <div className="p-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between font-semibold">
               <div className="flex items-center gap-2">
                 <MessageSquare className="text-accent" size={20} />
                 AI 수강 비서
               </div>
-              <button onClick={() => setIsChatbotOpen(false)} className="text-slate-400 hover:text-white text-xl">
+              <button onClick={() => setIsChatbotOpen(false)} className="text-slate-500 hover:text-white text-xl">
                 ×
               </button>
             </div>

@@ -4,7 +4,7 @@ import { Plus, Search, Tag, X, FileText } from 'lucide-react';
 import CourseSyllabusModal from './CourseSyllabusModal';
 
 export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab = 'all' }) {
-  const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+  const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   const [courses, setCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [activeTab, setActiveTab] = useState(initialTab); // 'all', 'major', 'general'
@@ -135,8 +135,8 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
   return (
     <div className="flex flex-col h-full p-6 relative">
       <div className="mb-4 relative z-20">
-        <div className="flex flex-wrap items-center gap-2 bg-slate-800 border border-slate-600 rounded-xl p-2 min-h-[50px] transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-          <Search className="text-slate-400 ml-2" size={20} />
+        <div className="flex flex-wrap items-center gap-2 bg-white border border-slate-300 rounded-xl p-2 min-h-[50px] transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+          <Search className="text-slate-500 ml-2" size={20} />
           
           {selectedTags.map(tag => (
             <span key={tag} className="flex items-center gap-1 bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-semibold">
@@ -149,7 +149,7 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
             ref={searchInputRef}
             type="text" 
             placeholder={selectedTags.length === 0 ? "강의명, 교수, 태그(예: 파이썬) 검색..." : "태그 추가 검색..."}
-            className="flex-1 bg-transparent border-none py-1 px-2 text-slate-200 focus:outline-none min-w-[150px]"
+            className="flex-1 bg-transparent border-none py-1 px-2 text-slate-700 focus:outline-none min-w-[150px]"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -162,14 +162,14 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
 
         {/* Autocomplete Dropdown */}
         {showSuggestions && relatedTags.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-600 rounded-xl shadow-xl overflow-hidden z-30">
-            <div className="p-2 text-xs font-bold text-slate-400 bg-slate-900/50">연관 태그 추천 (Enter로 선택)</div>
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-300 rounded-xl shadow-xl overflow-hidden z-30">
+            <div className="p-2 text-xs font-bold text-slate-500 bg-slate-100/50">연관 태그 추천 (Enter로 선택)</div>
             <ul className="max-h-48 overflow-y-auto">
               {relatedTags.map(tag => (
                 <li 
                   key={tag}
                   onClick={() => handleAddTag(tag)}
-                  className="px-4 py-2 hover:bg-primary/20 hover:text-primary cursor-pointer transition-colors flex items-center gap-2 text-slate-200"
+                  className="px-4 py-2 hover:bg-primary/20 hover:text-primary cursor-pointer transition-colors flex items-center gap-2 text-slate-700"
                 >
                   <Tag size={14} /> {tag}
                 </li>
@@ -187,19 +187,19 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
       <div className="flex gap-2 mb-6">
         <button 
           onClick={() => setActiveTab('all')}
-          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'all' ? 'bg-primary text-white shadow-md' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'all' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-200'}`}
         >
           전체 보기
         </button>
         <button 
           onClick={() => setActiveTab('major')}
-          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'major' ? 'bg-primary text-white shadow-md' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'major' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-200'}`}
         >
           컴퓨터계열 (전공)
         </button>
         <button 
           onClick={() => setActiveTab('general')}
-          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'general' ? 'bg-primary text-white shadow-md' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'general' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-200'}`}
         >
           교양 과목
         </button>
@@ -208,17 +208,17 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
       <div className="flex-1 overflow-auto custom-scrollbar pr-2">
         <div className="grid gap-4">
           {displayCourses.map(course => (
-            <div key={course.id} className="bg-slate-800/40 border border-slate-700 p-5 rounded-xl hover:bg-slate-800 transition-colors flex justify-between items-center group">
+            <div key={course.id} className="bg-white border border-slate-200 p-5 rounded-xl hover:bg-white transition-colors flex justify-between items-center group">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold px-2 py-1 bg-slate-700 rounded-md text-slate-300">{course.code}</span>
+                  <span className="text-xs font-bold px-2 py-1 bg-slate-200 rounded-md text-slate-600">{course.code}</span>
                   <span className="text-xs font-bold px-2 py-1 bg-primary/20 text-primary rounded-md">{course.category}</span>
                   {course.is_pn_eligible && (
                     <span className="text-xs font-bold px-2 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded-md shadow-sm">P/N 가능</span>
                   )}
                 </div>
-                <h3 className="text-xl font-bold text-white mb-1">{course.title} <span className="text-sm font-normal text-slate-400 ml-2">{course.credits}학점</span></h3>
-                <p className="text-sm text-slate-400 mb-2">{course.professor} | {course.schedule} | {course.location}</p>
+                <h3 className="text-xl font-bold text-white mb-1">{course.title} <span className="text-sm font-normal text-slate-500 ml-2">{course.credits}학점</span></h3>
+                <p className="text-sm text-slate-500 mb-2">{course.professor} | {course.schedule} | {course.location}</p>
                 <div className="flex gap-2">
                   {course.tags.split(',').map(tag => {
                     const trimmed = tag.trim();
@@ -228,7 +228,7 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
                       <button 
                         key={trimmed} 
                         onClick={() => isSelected ? handleRemoveTag(trimmed) : handleAddTag(trimmed)}
-                        className={`text-xs flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${isSelected ? 'bg-primary/30 text-primary font-bold shadow-sm border border-primary/30' : 'text-slate-400 bg-slate-900/50 hover:bg-slate-700'}`}
+                        className={`text-xs flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${isSelected ? 'bg-primary/30 text-primary font-bold shadow-sm border border-primary/30' : 'text-slate-500 bg-slate-100/50 hover:bg-slate-200'}`}
                       >
                         <Tag size={10} /> {trimmed}
                       </button>
@@ -246,7 +246,7 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
                 </button>
                 <button 
                   onClick={() => setSelectedCourseForSyllabus(course)}
-                  className="bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white p-3 rounded-xl transition-all"
+                  className="bg-slate-200/50 text-slate-600 hover:bg-slate-300 hover:text-white p-3 rounded-xl transition-all"
                   title="강의계획서 보기"
                 >
                   <FileText size={20} />

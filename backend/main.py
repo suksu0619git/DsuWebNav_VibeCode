@@ -9,10 +9,16 @@ import schemas
 import dummy_data
 from ai_agent import get_chat_response
 
+import os
+from fastapi import FastAPI, Depends, HTTPException
+
 # Initialize DB
 dummy_data.init_db()
 
-app = FastAPI(title="AI Course Scheduler API")
+app = FastAPI(
+    title="AI Course Scheduler API",
+    root_path="/api" if os.environ.get("VERCEL") else ""
+)
 
 # Configure CORS for frontend
 app.add_middleware(

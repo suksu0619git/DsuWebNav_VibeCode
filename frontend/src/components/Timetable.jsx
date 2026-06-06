@@ -68,7 +68,7 @@ function groupToBlocks(slots) {
 }
 
 export default function Timetable({ cart, onRemove, onSlotSelect }) {
-  const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+  const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   const [hoveredCourse, setHoveredCourse] = useState(null);
   const [tooltip, setTooltip] = useState(null);
 
@@ -319,12 +319,12 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
   const totalCredits = cart.reduce((sum, item) => sum + (item.course.credits || 0), 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '20px', gap: '16px', background: '#0f172a', minHeight: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '20px', gap: '16px', background: '#f8fafc', minHeight: 0 }}>
       
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Calendar size={22} color="#6366f1" />
             내 시간표 및 빌더
           </h2>
@@ -339,7 +339,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
             onClick={() => { setShowAutoScheduler(!showAutoScheduler); setShowShareModal(false); }}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
-              background: showAutoScheduler ? '#6366f1' : '#1e293b', border: `1px solid ${showAutoScheduler ? '#818cf8' : '#334155'}`,
+              background: showAutoScheduler ? '#6366f1' : '#ffffff', border: `1px solid ${showAutoScheduler ? '#818cf8' : '#e2e8f0'}`,
               color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
             }}
           >
@@ -352,7 +352,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
             onClick={() => { setShowShareModal(!showShareModal); setShowAutoScheduler(false); }}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
-              background: showShareModal ? '#0ea5e9' : '#1e293b', border: `1px solid ${showShareModal ? '#38bdf8' : '#334155'}`,
+              background: showShareModal ? '#0ea5e9' : '#ffffff', border: `1px solid ${showShareModal ? '#38bdf8' : '#e2e8f0'}`,
               color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
             }}
           >
@@ -386,11 +386,11 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
       <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
 
         {/* 왼쪽: 시간표 그리드 */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#1e293b', borderRadius: '14px', border: '1px solid #334155', overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
           
           {/* 요일 헤더 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '52px repeat(5, 1fr)', background: '#1e293b', borderBottom: '2px solid #334155', flexShrink: 0 }}>
-            <div style={{ padding: '10px 4px', textAlign: 'center', fontSize: '11px', color: '#475569' }}>교시</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '52px repeat(5, 1fr)', background: '#ffffff', borderBottom: '2px solid #e2e8f0', flexShrink: 0 }}>
+            <div style={{ padding: '10px 4px', textAlign: 'center', fontSize: '11px', color: '#64748b' }}>교시</div>
             {DAYS.map(day => (
               <div key={day} style={{
                 padding: '10px 4px',
@@ -398,7 +398,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                 fontSize: '14px',
                 fontWeight: 700,
                 color: day === '월' ? '#6366f1' : day === '수' ? '#22d3ee' : day === '금' ? '#f472b6' : '#94a3b8',
-                borderLeft: '1px solid #334155'
+                borderLeft: '1px solid #e2e8f0'
               }}>
                 {day}
               </div>
@@ -409,11 +409,11 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
           <div style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
             <div style={{ position: 'relative' }}>
               {PERIODS.map(period => (
-                <div key={period} style={{ display: 'grid', gridTemplateColumns: '52px repeat(5, 1fr)', borderBottom: '1px solid #1e3a5f' }}>
+                <div key={period} style={{ display: 'grid', gridTemplateColumns: '52px repeat(5, 1fr)', borderBottom: '1px solid #e2e8f0' }}>
                   {/* 교시/시간 레이블 */}
-                  <div style={{ padding: '0', textAlign: 'center', borderRight: '1px solid #334155', background: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '64px' }}>
+                  <div style={{ padding: '0', textAlign: 'center', borderRight: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '64px' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>{period}</span>
-                    <span style={{ fontSize: '10px', color: '#334155', marginTop: '2px' }}>{PERIOD_TIME[period]}</span>
+                    <span style={{ fontSize: '10px', color: '#e2e8f0', marginTop: '2px' }}>{PERIOD_TIME[period]}</span>
                   </div>
                   {/* 각 요일 셀 */}
                   {DAYS.map(day => {
@@ -423,7 +423,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                         key={day}
                         onClick={() => handleCellClick(day, period)}
                         style={{
-                          borderLeft: '1px solid #1e3a5f',
+                          borderLeft: '1px solid #e2e8f0',
                           minHeight: '64px',
                           position: 'relative',
                           cursor: 'pointer',
@@ -523,7 +523,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
           
           {/* 1. 친구 비교 패널 */}
           {showShareModal && (
-            <div style={{ background: '#1e293b', border: '1px solid #0ea5e9', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #0ea5e9', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '14px', fontWeight: 700, color: '#0ea5e9', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Users size={16} /> 친구 시간표 대조
@@ -539,7 +539,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                     type="text"
                     readOnly
                     value={myShareCode || '과목을 담아주세요.'}
-                    style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', color: '#94a3b8', outline: 'none' }}
+                    style={{ flex: 1, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', color: '#94a3b8', outline: 'none' }}
                   />
                   <button
                     onClick={handleCopyShareCode}
@@ -557,7 +557,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                   placeholder="예: CS101,CS202"
                   value={friendCodeInput}
                   onChange={e => setFriendCodeInput(e.target.value)}
-                  style={{ width: '100%', height: '50px', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '6px', fontSize: '12px', color: '#fff', resize: 'none', marginTop: '4px', outline: 'none' }}
+                  style={{ width: '100%', height: '50px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px', fontSize: '12px', color: '#fff', resize: 'none', marginTop: '4px', outline: 'none' }}
                 />
               </div>
 
@@ -571,7 +571,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                 {friendCourses.length > 0 && (
                   <button
                     onClick={handleClearFriend}
-                    style={{ background: '#334155', border: 'none', borderRadius: '6px', padding: '6px 10px', fontSize: '12px', color: '#94a3b8', cursor: 'pointer' }}
+                    style={{ background: '#e2e8f0', border: 'none', borderRadius: '6px', padding: '6px 10px', fontSize: '12px', color: '#94a3b8', cursor: 'pointer' }}
                   >
                     초기화
                   </button>
@@ -582,7 +582,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
 
           {/* 2. AI 시간표 자동 빌더 패널 */}
           {showAutoScheduler && (
-            <div style={{ background: '#1e293b', border: '1px solid #6366f1', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #6366f1', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '14px', fontWeight: 700, color: '#818cf8', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Sparkles size={16} /> AI 자동 조합 스케줄러
@@ -592,7 +592,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
 
               {/* 제약조건 */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#f1f5f9', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#1e293b', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={constraints.fridayFree}
@@ -601,7 +601,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                   />
                   금요일 공강 만들기 (주4일)
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#f1f5f9', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#1e293b', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={constraints.noMorning}
@@ -610,7 +610,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                   />
                   1교시 아침수업 제외 (09:00~)
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#f1f5f9', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#1e293b', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={constraints.lunchFree}
@@ -625,7 +625,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                   <select
                     value={constraints.minCredits}
                     onChange={e => setConstraints({ ...constraints, minCredits: parseInt(e.target.value) })}
-                    style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '4px', padding: '2px 4px', fontSize: '11px', color: '#fff' }}
+                    style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '2px 4px', fontSize: '11px', color: '#fff' }}
                   >
                     <option value={9}>9학점 이상</option>
                     <option value={12}>12학점 이상</option>
@@ -643,7 +643,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
 
               {/* 생성된 결과 */}
               {generatedOptions.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '140px', overflowY: 'auto', marginTop: '4px', borderTop: '1px solid #334155', paddingTop: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '140px', overflowY: 'auto', marginTop: '4px', borderTop: '1px solid #e2e8f0', paddingTop: '8px' }}>
                   <div style={{ fontSize: '11px', color: '#64748b' }}>추천 시안 (마우스오버 시 미리보기)</div>
                   {generatedOptions.map((opt, idx) => (
                     <div
@@ -651,12 +651,12 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                       onMouseEnter={() => setHoveredOptionIdx(idx)}
                       onMouseLeave={() => setHoveredOptionIdx(null)}
                       style={{
-                        background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '8px',
+                        background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px',
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'border 0.15s'
                       }}
                     >
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#f1f5f9' }}>시안 {idx + 1} ({opt.credits}학점)</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b' }}>시안 {idx + 1} ({opt.credits}학점)</span>
                         <span style={{ fontSize: '10px', color: '#64748b' }}>과목 {opt.courses.length}개 조합</span>
                       </div>
                       <button
@@ -684,8 +684,8 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
             <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', paddingLeft: '2px' }}>장바구니 목록 ({cart.length})</div>
             
             {cart.length === 0 && (
-              <div style={{ background: '#1e293b', borderRadius: '12px', padding: '24px', textAlign: 'center', color: '#475569', fontSize: '13px', border: '1px dashed #334155' }}>
-                <Calendar size={28} color="#334155" style={{ margin: '0 auto 8px' }} />
+              <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '13px', border: '1px dashed #e2e8f0' }}>
+                <Calendar size={28} color="#e2e8f0" style={{ margin: '0 auto 8px' }} />
                 장바구니가 비어있습니다
               </div>
             )}
@@ -701,8 +701,8 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                 <div
                   key={item.id}
                   style={{
-                    background: isHovered ? '#1e293b' : '#1a2332',
-                    border: `1px solid ${isHovered ? color.bg : '#334155'}`,
+                    background: isHovered ? '#ffffff' : '#ffffff',
+                    border: `1px solid ${isHovered ? color.bg : '#e2e8f0'}`,
                     borderLeft: `4px solid ${color.bg}`,
                     borderRadius: '10px',
                     padding: '12px',
@@ -720,13 +720,13 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#f1f5f9', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.course.title}
                       </div>
                       <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>
                         {item.course.professor} · {item.course.credits}학점
                       </div>
-                      <div style={{ fontSize: '11px', color: '#475569' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>
                         {item.course.schedule} | {item.course.location}
                       </div>
                       <div style={{ marginTop: '6px', display: 'inline-block', background: `${color.bg}22`, color: color.bg, borderRadius: '4px', padding: '1px 6px', fontSize: '10px', fontWeight: 600 }}>
@@ -735,9 +735,9 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px', marginLeft: '4px', flexShrink: 0, borderRadius: '6px', transition: 'color 0.15s, background 0.15s' }}
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', marginLeft: '4px', flexShrink: 0, borderRadius: '6px', transition: 'color 0.15s, background 0.15s' }}
                       onMouseEnter={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(248,113,113,0.1)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.background = 'transparent'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.background = 'transparent'; }}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -748,7 +748,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
           </div>
 
           {/* 빈 셀 클릭 안내 */}
-          <div style={{ background: '#1e293b', borderRadius: '10px', padding: '10px 12px', border: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ background: '#ffffff', borderRadius: '10px', padding: '10px 12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Info size={14} color="#6366f1" style={{ flexShrink: 0 }} />
             <span style={{ fontSize: '11px', color: '#64748b', lineHeight: 1.4 }}>시간표 빈 칸을 클릭하면 해당 시간대 강의를 검색합니다</span>
           </div>
@@ -763,7 +763,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
             bottom: '24px',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: '#1e293b',
+            background: '#ffffff',
             border: `1px solid ${colorMap[tooltip.code]?.bg || '#6366f1'}`,
             borderRadius: '14px',
             padding: '16px 20px',
@@ -775,7 +775,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
           onClick={() => setTooltip(null)}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '15px' }}>{tooltip.title}</span>
+            <span style={{ fontWeight: 700, color: '#1e293b', fontSize: '15px' }}>{tooltip.title}</span>
             <span style={{ fontSize: '12px', color: colorMap[tooltip.code]?.bg || '#6366f1', background: `${colorMap[tooltip.code]?.bg || '#6366f1'}22`, padding: '2px 8px', borderRadius: '6px' }}>{tooltip.credits}학점</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '12px', color: '#94a3b8' }}>
@@ -785,7 +785,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
             <div>📍 {tooltip.location}</div>
             <div>🏷️ {tooltip.category}</div>
           </div>
-          <div style={{ marginTop: '8px', fontSize: '11px', color: '#475569', textAlign: 'center' }}>클릭하여 닫기</div>
+          <div style={{ marginTop: '8px', fontSize: '11px', color: '#64748b', textAlign: 'center' }}>클릭하여 닫기</div>
         </div>
       )}
     </div>

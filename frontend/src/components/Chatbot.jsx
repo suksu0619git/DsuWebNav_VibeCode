@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Send, Bot, User } from 'lucide-react';
 
 export default function Chatbot({ onUpdateCart }) {
-  const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+  const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   const [messages, setMessages] = useState([
     { role: 'assistant', content: '안녕하세요! 수강신청 비서입니다. 무엇을 도와드릴까요? (예: "장바구니에 CS101 담아줘", "파이썬 관련 교양 추천해줘")' }
   ]);
@@ -45,7 +45,7 @@ export default function Chatbot({ onUpdateCart }) {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${m.role === 'user' ? 'bg-accent' : 'bg-primary'}`}>
               {m.role === 'user' ? <User size={16} /> : <Bot size={16} />}
             </div>
-            <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-accent/20 text-accent-50 rounded-tr-none' : 'bg-slate-700/50 text-slate-200 rounded-tl-none'}`}>
+            <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-accent/20 text-accent-50 rounded-tr-none' : 'bg-slate-200/50 text-slate-700 rounded-tl-none'}`}>
               {m.content.split('\n').map((line, j) => <p key={j}>{line}</p>)}
             </div>
           </div>
@@ -55,7 +55,7 @@ export default function Chatbot({ onUpdateCart }) {
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
               <Bot size={16} />
             </div>
-            <div className="bg-slate-700/50 p-3 rounded-2xl rounded-tl-none flex gap-1 items-center">
+            <div className="bg-slate-200/50 p-3 rounded-2xl rounded-tl-none flex gap-1 items-center">
               <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
               <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay:'0.2s'}}></div>
               <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay:'0.4s'}}></div>
@@ -64,14 +64,14 @@ export default function Chatbot({ onUpdateCart }) {
         )}
         <div ref={endRef} />
       </div>
-      <form onSubmit={handleSend} className="p-4 border-t border-slate-700 bg-slate-800/30">
+      <form onSubmit={handleSend} className="p-4 border-t border-slate-200 bg-slate-50">
         <div className="relative flex items-center">
           <input 
             type="text" 
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="AI에게 질문하기..."
-            className="w-full bg-slate-900 border border-slate-600 rounded-full py-3 pl-5 pr-12 text-sm text-slate-200 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+            className="w-full bg-slate-50 border border-slate-300 rounded-full py-3 pl-5 pr-12 text-sm text-slate-700 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
           />
           <button 
             type="submit" 
