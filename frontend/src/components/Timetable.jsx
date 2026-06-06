@@ -791,18 +791,3 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
     </div>
   );
 }
-Radius: '6px' }}>{tooltip.credits}학점</span>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '12px', color: '#94a3b8' }}>
-            <div>📚 {tooltip.code}</div>
-            <div>👨‍🏫 {tooltip.professor}</div>
-            <div>⏰ {tooltip.schedule}</div>
-            <div>📍 {tooltip.location}</div>
-            <div>🏷️ {tooltip.category}</div>
-          </div>
-          <div style={{ marginTop: '8px', fontSize: '11px', color: '#475569', textAlign: 'center' }}>클릭하여 닫기</div>
-        </div>
-      )}
-    </div>
-  );
-}

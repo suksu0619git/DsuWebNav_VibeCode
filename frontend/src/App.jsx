@@ -35,29 +35,29 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-slate-200 flex flex-col font-sans">
-      <header className="bg-surface border-b border-slate-700 p-4 shadow-md z-10 relative">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2 text-primary font-bold text-2xl">
-            <BookOpen size={28} />
-            <span>AI Course Scheduler</span>
+    <div className="min-h-screen bg-background text-slate-200 flex flex-col font-sans pt-20">
+      <header className="fixed top-0 left-0 right-0 bg-surface/80 backdrop-blur-md border-b border-slate-700 px-6 py-4 shadow-lg z-50 transition-all">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-3 text-primary font-extrabold text-2xl tracking-tight">
+            <BookOpen size={28} className="text-accent" />
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">AI Scheduler</span>
           </div>
-          <nav className="flex gap-4">
+          <nav className="flex gap-2">
             <button 
               onClick={() => setActiveTab('search')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === 'search' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'hover:bg-slate-700'}`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${activeTab === 'search' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
             >
               <Search size={18} /> 강의 검색
             </button>
             <button 
               onClick={() => setActiveTab('timetable')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === 'timetable' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'hover:bg-slate-700'}`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${activeTab === 'timetable' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
             >
               <Calendar size={18} /> 시간표/장바구니
             </button>
             <button 
               onClick={() => setActiveTab('credits')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === 'credits' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'hover:bg-slate-700'}`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${activeTab === 'credits' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
             >
               <Clock size={18} /> 학점 관리
             </button>
@@ -65,7 +65,7 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto p-4 flex gap-6 relative">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 flex gap-6 relative">
         <div className="flex-1 bg-surface rounded-2xl shadow-xl border border-slate-700 overflow-hidden flex flex-col relative z-0">
           {activeTab === 'search' && <CourseSearch onAdd={() => fetchCart()} initialSearchTerm={initialSearchTerm} initialTab={initialSearchTab} />}
           {activeTab === 'timetable' && <Timetable cart={cart} onRemove={() => fetchCart()} onSlotSelect={handleSlotSelect} />}

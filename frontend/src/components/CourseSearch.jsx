@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Plus, Search, Tag } from 'lucide-react';
+import { Plus, Search, Tag, X, FileText } from 'lucide-react';
+import CourseSyllabusModal from './CourseSyllabusModal';
 
 export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab = 'all' }) {
   const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
@@ -8,7 +9,11 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [activeTab, setActiveTab] = useState(initialTab); // 'all', 'major', 'general'
   const [displayCount, setDisplayCount] = useState(20);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCourseForSyllabus, setSelectedCourseForSyllabus] = useState(null);
   const observerTarget = useRef(null);
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -26,12 +31,46 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDisplayCount(20);
-  }, [searchTerm, activeTab]);
+  }, [searchTerm, activeTab, selectedTags]);
   
   useEffect(() => {
     if (initialSearchTerm !== searchTerm) setSearchTerm(initialSearchTerm);
     if (initialTab !== activeTab) setActiveTab(initialTab);
   }, [initialSearchTerm, initialTab]);
+
+  const allTags = [...new Set(courses.flatMap(c => c.tags.split(',').map(t => t.trim()).filter(Boolean)))];
+  const relatedTags = searchTerm 
+    ? allTags.filter(t => t.toLowerCase().includes(searchTerm.toLowerCase()) && !selectedTags.includes(t))
+    : [];
+
+  const handleAddTag = (tag) => {
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags([...selectedTags, tag]);
+    }
+    setSearchTerm('');
+    setShowSuggestions(false);
+    searchInputRef.current?.focus();
+  };
+
+  const handleRemoveTag = (tag) => {
+    setSelectedTags(selectedTags.filter(t => t !== tag));
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && searchTerm) {
+      // If there's an exact match in related tags, or just use the first suggestion
+      if (relatedTags.length > 0) {
+        handleAddTag(relatedTags[0]);
+      } else {
+        handleAddTag(searchTerm);
+      }
+    } else if (e.key === 'Backspace' && !searchTerm && selectedTags.length > 0) {
+      // Remove last tag when pressing backspace on empty input
+      const newTags = [...selectedTags];
+      newTags.pop();
+      setSelectedTags(newTags);
+    }
+  };
 
   // Infinite scroll intersection observer
   useEffect(() => {
@@ -63,14 +102,18 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
       matchTab = c.category.includes('교양');
     }
 
-    // 2. Search Term Filtering
-    const matchSearch = 
+    // 2. Tag Filtering (AND condition)
+    const courseTags = c.tags.split(',').map(t => t.trim());
+    const matchTags = selectedTags.every(tag => courseTags.includes(tag) || c.title.includes(tag) || c.professor.includes(tag));
+
+    // 3. Search Term Filtering
+    const matchSearch = searchTerm === '' ||
       c.title.includes(searchTerm) || 
       c.tags.includes(searchTerm) ||
       c.professor.includes(searchTerm) ||
-      c.schedule.includes(searchTerm); // Added schedule search
+      c.schedule.includes(searchTerm);
 
-    return matchTab && matchSearch;
+    return matchTab && matchTags && matchSearch;
   });
 
   const displayCourses = filtered.slice(0, displayCount);
@@ -90,17 +133,56 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
   };
 
   return (
-    <div className="flex flex-col h-full p-6">
-      <div className="mb-4 relative">
-        <input 
-          type="text" 
-          placeholder="강의명, 교수, 태그(예: 파이썬, 교양) 검색..."
-          className="w-full bg-slate-800 border border-slate-600 rounded-xl py-3 px-12 text-slate-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
+    <div className="flex flex-col h-full p-6 relative">
+      <div className="mb-4 relative z-20">
+        <div className="flex flex-wrap items-center gap-2 bg-slate-800 border border-slate-600 rounded-xl p-2 min-h-[50px] transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+          <Search className="text-slate-400 ml-2" size={20} />
+          
+          {selectedTags.map(tag => (
+            <span key={tag} className="flex items-center gap-1 bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-semibold">
+              <Tag size={12} /> {tag}
+              <button onClick={() => handleRemoveTag(tag)} className="ml-1 hover:text-white transition-colors"><X size={14} /></button>
+            </span>
+          ))}
+
+          <input 
+            ref={searchInputRef}
+            type="text" 
+            placeholder={selectedTags.length === 0 ? "강의명, 교수, 태그(예: 파이썬) 검색..." : "태그 추가 검색..."}
+            className="flex-1 bg-transparent border-none py-1 px-2 text-slate-200 focus:outline-none min-w-[150px]"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onKeyDown={handleKeyDown}
+          />
+        </div>
+
+        {/* Autocomplete Dropdown */}
+        {showSuggestions && relatedTags.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-600 rounded-xl shadow-xl overflow-hidden z-30">
+            <div className="p-2 text-xs font-bold text-slate-400 bg-slate-900/50">연관 태그 추천 (Enter로 선택)</div>
+            <ul className="max-h-48 overflow-y-auto">
+              {relatedTags.map(tag => (
+                <li 
+                  key={tag}
+                  onClick={() => handleAddTag(tag)}
+                  className="px-4 py-2 hover:bg-primary/20 hover:text-primary cursor-pointer transition-colors flex items-center gap-2 text-slate-200"
+                >
+                  <Tag size={14} /> {tag}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
+
+      {/* Overlay to close dropdown when clicking outside */}
+      {showSuggestions && (
+        <div className="fixed inset-0 z-10" onClick={() => setShowSuggestions(false)}></div>
+      )}
 
       <div className="flex gap-2 mb-6">
         <button 
@@ -138,21 +220,38 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
                 <h3 className="text-xl font-bold text-white mb-1">{course.title} <span className="text-sm font-normal text-slate-400 ml-2">{course.credits}학점</span></h3>
                 <p className="text-sm text-slate-400 mb-2">{course.professor} | {course.schedule} | {course.location}</p>
                 <div className="flex gap-2">
-                  {course.tags.split(',').map(tag => (
-                    tag && (
-                      <span key={tag} className="text-xs flex items-center gap-1 text-slate-400 bg-slate-900/50 px-2 py-1 rounded-full">
-                        <Tag size={10} /> {tag}
-                      </span>
-                    )
-                  ))}
+                  {course.tags.split(',').map(tag => {
+                    const trimmed = tag.trim();
+                    if (!trimmed) return null;
+                    const isSelected = selectedTags.includes(trimmed);
+                    return (
+                      <button 
+                        key={trimmed} 
+                        onClick={() => isSelected ? handleRemoveTag(trimmed) : handleAddTag(trimmed)}
+                        className={`text-xs flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${isSelected ? 'bg-primary/30 text-primary font-bold shadow-sm border border-primary/30' : 'text-slate-400 bg-slate-900/50 hover:bg-slate-700'}`}
+                      >
+                        <Tag size={10} /> {trimmed}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <button 
-                onClick={() => handleAdd(course.id)}
-                className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-3 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-              >
-                <Plus size={24} />
-              </button>
+              <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button 
+                  onClick={() => handleAdd(course.id)}
+                  className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-3 rounded-xl transition-all"
+                  title="장바구니 담기"
+                >
+                  <Plus size={20} />
+                </button>
+                <button 
+                  onClick={() => setSelectedCourseForSyllabus(course)}
+                  className="bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white p-3 rounded-xl transition-all"
+                  title="강의계획서 보기"
+                >
+                  <FileText size={20} />
+                </button>
+              </div>
             </div>
           ))}
           {filtered.length === 0 && (
@@ -168,6 +267,11 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
           )}
         </div>
       </div>
+
+      <CourseSyllabusModal 
+        course={selectedCourseForSyllabus} 
+        onClose={() => setSelectedCourseForSyllabus(null)} 
+      />
     </div>
   );
 }
