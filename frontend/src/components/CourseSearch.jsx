@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Plus, Search, Tag, X, FileText } from 'lucide-react';
 import CourseSyllabusModal from './CourseSyllabusModal';
 
-export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab = 'all' }) {
+export default function CourseSearch({ studentId, onAdd, initialSearchTerm = '', initialTab = 'all' }) {
   const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   const [courses, setCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
@@ -122,13 +122,17 @@ export default function CourseSearch({ onAdd, initialSearchTerm = '', initialTab
     try {
       await axios.post(`${API_URL}/cart`, {
         course_id: courseId,
-        user_id: 1
+        user_id: studentId || "default"
       });
       onAdd();
       alert('장바구니에 담겼습니다.');
     } catch (err) {
       console.error(err);
-      alert('장바구니 담기에 실패했습니다.');
+      if (err.response && err.response.status === 400) {
+        alert(err.response.data.detail);
+      } else {
+        alert('장바구니 담기에 실패했습니다.');
+      }
     }
   };
 

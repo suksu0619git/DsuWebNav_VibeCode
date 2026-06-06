@@ -56,13 +56,24 @@ def _chat_with_ai(request: schemas.ChatRequest, db: Session = Depends(get_db)):
         if course:
             existing = db.query(models.CartItem).filter(
                 models.CartItem.course_id == course.id,
-                models.CartItem.user_id == 1
+                models.CartItem.user_id == request.message.split('||')[1] if '||' in request.message else "default"
             ).first()
             if not existing:
-                cart_item = models.CartItem(course_id=course.id, user_id=1)
-                db.add(cart_item)
-                db.commit()
-                reply_message += f"\n[시스템] {course.title} 과목을 장바구니에 담았습니다."
+                # Add logic later for chat if we want chat to add to cart properly with user_id
+                # For now, we will use a generic "default" user_id if not provided
+                uid = request.message.split('||')[1] if '||' in request.message else "default"
+                
+                # Check 18 credit limit
+                current_cart = db.query(models.CartItem).filter(models.CartItem.user_id == uid).all()
+                total_credits = sum(item.course.credits for item in current_cart if item.course)
+                
+                if total_credits + course.credits > 18:
+                    reply_message += f"\n[시스템] 최대 수강 가능 학점(18학점)을 초과할 수 없습니다. (현재: {total_credits}학점)"
+                else:
+                    cart_item = models.CartItem(course_id=course.id, user_id=uid)
+                    db.add(cart_item)
+                    db.commit()
+                    reply_message += f"\n[시스템] {course.title} 과목을 장바구니에 담았습니다."
             else:
                 reply_message += f"\n[시스템] {course.title} 과목은 이미 장바구니에 있습니다."
         else:
@@ -70,10 +81,21 @@ def _chat_with_ai(request: schemas.ChatRequest, db: Session = Depends(get_db)):
 
     return schemas.ChatResponse(reply=reply_message, action_taken=action)
 
-def _get_cart(db: Session = Depends(get_db)):
-    return db.query(models.CartItem).filter(models.CartItem.user_id == 1).all()
+def _get_cart(user_id: str, db: Session = Depends(get_db)):
+    return db.query(models.CartItem).filter(models.CartItem.user_id == user_id).all()
 
 def _add_to_cart(item: schemas.CartItemCreate, db: Session = Depends(get_db)):
+    # Check max 18 credits limit
+    current_cart = db.query(models.CartItem).filter(models.CartItem.user_id == item.user_id).all()
+    total_credits = sum(ci.course.credits for ci in current_cart if ci.course)
+    
+    course = db.query(models.Course).filter(models.Course.id == item.course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+        
+    if total_credits + course.credits > 18:
+        raise HTTPException(status_code=400, detail=f"최대 수강 가능 학점(18학점)을 초과합니다. (현재: {total_credits}학점)")
+
     db_item = models.CartItem(**item.dict())
     db.add(db_item)
     db.commit()

@@ -23,7 +23,7 @@ class Course(CourseBase):
 
 class CartItemBase(BaseModel):
     course_id: int
-    user_id: int
+    user_id: str
 
 class CartItemCreate(CartItemBase):
     pass

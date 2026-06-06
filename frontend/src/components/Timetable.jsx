@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trash2, AlertTriangle, Calendar, Info, Share2, Users, Wand2, Building2, Sparkles, X, Copy, Check } from 'lucide-react';
+import { Trash2, AlertTriangle, Calendar, Info, Share2, Users, Wand2, Building2, Sparkles, X, Copy, Check, Download, QrCode } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { QRCodeCanvas } from 'qrcode.react';
 
 // 요일별 색상 팔레트 (에브리타임 스타일)
 const COURSE_COLORS = [
@@ -67,7 +69,7 @@ function groupToBlocks(slots) {
   return blocks;
 }
 
-export default function Timetable({ cart, onRemove, onSlotSelect }) {
+export default function Timetable({ studentId, cart, onRemove, onSlotSelect }) {
   const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   const [hoveredCourse, setHoveredCourse] = useState(null);
   const [tooltip, setTooltip] = useState(null);
@@ -89,6 +91,10 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
   });
   const [generatedOptions, setGeneratedOptions] = useState([]);
   const [hoveredOptionIdx, setHoveredOptionIdx] = useState(null);
+
+  // QR 코드 모달 상태
+  const [showQrModal, setShowQrModal] = useState(false);
+  const timetableRef = React.useRef(null);
 
   // 모든 강의 목록 로드
   useEffect(() => {
@@ -211,7 +217,7 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
       for (const course of selectedCourses) {
         await axios.post(`${API_URL}/cart`, {
           course_id: course.id,
-          user_id: 1
+          user_id: studentId || "default"
         });
       }
       onRemove(); // 카트 갱신 트리거
@@ -221,6 +227,30 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
     } catch (err) {
       console.error(err);
       alert('시간표 적용 과정에서 오류가 발생했습니다.');
+    }
+  };
+
+  // 시간표 이미지 다운로드
+  const handleDownloadImage = async () => {
+    if (!timetableRef.current) return;
+    try {
+      // 캡처 전 숨겨진 헤더 표시
+      const header = timetableRef.current.querySelector('.print-header');
+      if (header) header.style.display = 'block';
+      
+      const canvas = await html2canvas(timetableRef.current, { backgroundColor: '#ffffff', scale: 2 });
+      
+      // 캡처 후 다시 숨김
+      if (header) header.style.display = 'none';
+
+      const image = canvas.toDataURL("image/png", 1.0);
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = `DSU_시간표_${studentId || '내'}.png`;
+      link.click();
+    } catch (err) {
+      console.error("이미지 캡처 실패:", err);
+      alert('이미지 저장에 실패했습니다.');
     }
   };
 
@@ -357,7 +387,33 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
             }}
           >
             <Users size={15} color={showShareModal ? '#fff' : '#38bdf8'} />
-            친구 시간표 공유 & 비교
+            공유 & 비교
+          </button>
+
+          {/* 이미지 저장 버튼 */}
+          <button
+            onClick={handleDownloadImage}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
+              background: '#10b981', border: '1px solid #059669',
+              color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
+            }}
+          >
+            <Download size={15} color="#fff" />
+            이미지 저장
+          </button>
+
+          {/* QR 코드 버튼 */}
+          <button
+            onClick={() => setShowQrModal(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px',
+              background: '#f59e0b', border: '1px solid #d97706',
+              color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s'
+            }}
+          >
+            <QrCode size={15} color="#fff" />
+            QR 보기
           </button>
         </div>
       </div>
@@ -385,8 +441,13 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
       {/* 메인 레이아웃 */}
       <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
 
-        {/* 왼쪽: 시간표 그리드 */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+        {/* 왼쪽: 시간표 그리드 (캡처 대상 영역) */}
+        <div ref={timetableRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+          
+          {/* 캡처 시 표시할 헤더 정보 (평소엔 숨기거나 작게 표시) */}
+          <div style={{ display: 'none' }} className="print-header">
+            <h3 style={{ margin: '10px 16px', fontSize: '18px', fontWeight: 'bold' }}>{studentId}님의 시간표</h3>
+          </div>
           
           {/* 요일 헤더 */}
           <div style={{ display: 'grid', gridTemplateColumns: '52px repeat(5, 1fr)', background: '#ffffff', borderBottom: '2px solid #e2e8f0', flexShrink: 0 }}>
@@ -786,6 +847,29 @@ export default function Timetable({ cart, onRemove, onSlotSelect }) {
             <div>🏷️ {tooltip.category}</div>
           </div>
           <div style={{ marginTop: '8px', fontSize: '11px', color: '#64748b', textAlign: 'center' }}>클릭하여 닫기</div>
+        </div>
+      )}
+      {/* QR 모달 */}
+      {showQrModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
+          <div style={{ background: '#fff', padding: '30px', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', maxWidth: '320px', width: '100%', position: 'relative' }}>
+            <button onClick={() => setShowQrModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+              <X size={20} />
+            </button>
+            <div style={{ background: '#f59e0b', color: '#fff', padding: '10px', borderRadius: '50%' }}>
+              <QrCode size={32} />
+            </div>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#1e293b' }}>내 시간표 QR 코드</h3>
+            <p style={{ margin: 0, fontSize: '12px', color: '#64748b', textAlign: 'center', lineHeight: '1.5' }}>스마트폰으로 스캔하여 시간표 내역(텍스트)을 빠르게 확인할 수 있습니다.</p>
+            <div style={{ background: '#fff', padding: '16px', borderRadius: '16px', border: '2px solid #e2e8f0', marginTop: '8px' }}>
+              <QRCodeCanvas 
+                value={`[DSU AI 수강비서]\n학번: ${studentId || '기본'}\n총 학점: ${totalCredits}학점\n\n[수강 목록]\n` + cart.map(item => `${item.course.title} (${item.course.schedule})`).join('\n')} 
+                size={200}
+                level={"H"}
+              />
+            </div>
+            <button onClick={() => setShowQrModal(false)} style={{ width: '100%', padding: '12px', background: '#f1f5f9', border: 'none', borderRadius: '12px', color: '#475569', fontWeight: 'bold', cursor: 'pointer', marginTop: '8px' }}>닫기</button>
+          </div>
         </div>
       )}
     </div>

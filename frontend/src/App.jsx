@@ -16,9 +16,39 @@ function App() {
   const [initialChatMessage, setInitialChatMessage] = useState('');
   const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
 
+  const [studentId, setStudentId] = useState('');
+  const [showLoginModal, setShowLoginModal] = useState(true);
+
+  // Load from local storage
+  useEffect(() => {
+    const saved = localStorage.getItem('dsu_student_id');
+    if (saved) {
+      setStudentId(saved);
+      setShowLoginModal(false);
+    }
+  }, []);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const val = e.target.student_id.value.trim();
+    if (val) {
+      localStorage.setItem('dsu_student_id', val);
+      setStudentId(val);
+      setShowLoginModal(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('dsu_student_id');
+    setStudentId('');
+    setCart([]);
+    setShowLoginModal(true);
+  };
+
   const fetchCart = async () => {
+    if (!studentId) return;
     try {
-      const res = await axios.get(`${API_URL}/cart`);
+      const res = await axios.get(`${API_URL}/cart?user_id=${studentId}`);
       setCart(res.data);
     } catch (err) {
       console.error(err);
@@ -26,8 +56,10 @@ function App() {
   };
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    if (studentId) {
+      fetchCart();
+    }
+  }, [studentId]);
 
   const handleSlotSelect = (timeQuery) => {
     setInitialSearchTerm(timeQuery);
@@ -36,7 +68,8 @@ function App() {
   };
 
   const handleAskAI = (query) => {
-    setInitialChatMessage(query);
+    // Append student ID so backend knows who is adding to cart via chat
+    setInitialChatMessage(studentId ? `${query}||${studentId}` : query);
     setIsChatbotOpen(true);
   };
 
@@ -66,7 +99,7 @@ function App() {
             </button>
 
             {/* 3개 탭 버튼 */}
-            <nav className="flex items-stretch gap-0">
+            <nav className="flex items-stretch gap-0 flex-1">
               {navItems.map((item) => (
                 <button
                   key={item.key}
@@ -85,6 +118,19 @@ function App() {
               ))}
             </nav>
 
+            {/* 사용자 정보 / 로그아웃 */}
+            <div className="flex items-center">
+              <div className="text-sm font-semibold text-slate-600 bg-slate-100 px-3 py-1 rounded-full mr-3 hidden md:block">
+                {studentId}님
+              </div>
+              <button 
+                onClick={handleLogout}
+                className="text-xs text-slate-500 hover:text-red-500 underline transition-colors"
+              >
+                학번변경
+              </button>
+            </div>
+
           </div>
         </header>
       )}
@@ -95,9 +141,9 @@ function App() {
           <Home setActiveTab={setActiveTab} onAskAI={handleAskAI} />
         ) : (
           <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden flex flex-col" style={{ minHeight: 'calc(100vh - 5rem)' }}>
-            {activeTab === 'search'    && <CourseSearch onAdd={fetchCart} initialSearchTerm={initialSearchTerm} initialTab={initialSearchTab} />}
-            {activeTab === 'timetable' && <Timetable cart={cart} onRemove={fetchCart} onSlotSelect={handleSlotSelect} />}
-            {activeTab === 'credits'   && <CreditDashboard cart={cart} />}
+            {activeTab === 'search'    && <CourseSearch studentId={studentId} onAdd={fetchCart} initialSearchTerm={initialSearchTerm} initialTab={initialSearchTab} />}
+            {activeTab === 'timetable' && <Timetable studentId={studentId} cart={cart} onRemove={fetchCart} onSlotSelect={handleSlotSelect} />}
+            {activeTab === 'credits'   && <CreditDashboard studentId={studentId} cart={cart} />}
           </div>
         )}
       </main>
@@ -132,6 +178,36 @@ function App() {
             </button>
           </div>
           <Chatbot onUpdateCart={fetchCart} initialMessage={initialChatMessage} />
+        </div>
+      )}
+
+      {/* ── Login Modal Overlay ── */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full animate-in zoom-in duration-300">
+            <div className="flex justify-center mb-6">
+              <div className="bg-primary/10 p-4 rounded-full">
+                <BookOpen size={48} className="text-primary" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">DSU AI 수강비서</h2>
+            <p className="text-center text-slate-500 mb-6 text-sm">개인별 시간표 관리를 위해<br/>학번을 입력해주세요</p>
+            <form onSubmit={handleLogin} className="flex flex-col gap-4">
+              <input 
+                name="student_id"
+                type="text" 
+                placeholder="학번 입력 (예: 20240001)" 
+                required
+                className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all text-center text-lg font-semibold tracking-wider text-slate-700"
+              />
+              <button 
+                type="submit"
+                className="w-full bg-primary hover:bg-secondary text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95 text-lg"
+              >
+                시작하기
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>

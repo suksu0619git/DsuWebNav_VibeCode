@@ -21,6 +21,6 @@ class CartItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     course_id = Column(Integer, ForeignKey("courses.id"))
-    user_id = Column(Integer) # Mock user ID
+    user_id = Column(String) # Student ID
 
     course = relationship("Course")
