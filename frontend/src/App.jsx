@@ -18,17 +18,26 @@ function App() {
 
   const [studentId, setStudentId] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(true);
+  const [isViewOnly, setIsViewOnly] = useState(false);
 
   // Load from local storage or URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlStudentId = urlParams.get('student_id');
 
+    const urlViewOnly = urlParams.get('view_only') === 'true';
+
+    if (urlViewOnly) {
+      setIsViewOnly(true);
+    }
+
     if (urlStudentId) {
       localStorage.setItem('dsu_student_id', urlStudentId);
       setStudentId(urlStudentId);
       setShowLoginModal(false);
-      setActiveTab('timetable'); // QR 코드로 접속 시 시간표 탭으로 바로 이동
+      if (!urlViewOnly) {
+        setActiveTab('timetable'); // QR 코드로 접속 시 시간표 탭으로 바로 이동
+      }
     } else {
       const saved = localStorage.getItem('dsu_student_id');
       if (saved) {
@@ -90,6 +99,14 @@ function App() {
     { key: 'timetable', icon: <Calendar size={16} />, label: '시간표/장바구니' },
     { key: 'credits',   icon: <Clock size={16} />,    label: '학점 관리' },
   ];
+
+  if (isViewOnly) {
+    return (
+      <div className="w-full h-screen bg-white">
+        <Timetable studentId={studentId} cart={cart} viewOnly={true} />
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans ${isHome ? '' : 'pt-16'}`}>

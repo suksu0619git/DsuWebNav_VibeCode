@@ -69,7 +69,7 @@ function groupToBlocks(slots) {
   return blocks;
 }
 
-export default function Timetable({ studentId, cart, onRemove, onSlotSelect }) {
+export default function Timetable({ studentId, cart, onRemove, onSlotSelect, viewOnly = false }) {
   const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   const [hoveredCourse, setHoveredCourse] = useState(null);
   const [tooltip, setTooltip] = useState(null);
@@ -347,6 +347,86 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect }) {
   });
 
   const totalCredits = cart.reduce((sum, item) => sum + (item.course.credits || 0), 0);
+
+  if (viewOnly) {
+    return (
+      <div className="w-full h-full bg-white overflow-auto relative">
+        <div ref={timetableRef} className="w-[800px] sm:w-full min-h-[600px] flex flex-col bg-white">
+          <div className="text-center py-4 bg-primary text-white font-bold text-lg">
+            {studentId}님의 시간표
+          </div>
+          {/* 요일 헤더 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '52px repeat(5, 1fr)', background: '#ffffff', borderBottom: '2px solid #e2e8f0', flexShrink: 0 }}>
+            <div style={{ padding: '10px 4px', textAlign: 'center', fontSize: '11px', color: '#64748b' }}>교시</div>
+            {DAYS.map(day => (
+              <div key={day} style={{
+                padding: '10px 4px',
+                textAlign: 'center',
+                fontSize: '14px',
+                fontWeight: 700,
+                color: day === '월' ? '#6366f1' : day === '수' ? '#22d3ee' : day === '금' ? '#f472b6' : '#94a3b8',
+                borderLeft: '1px solid #e2e8f0'
+              }}>
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* 시간표 바디 */}
+          <div className="flex-1 relative">
+            {PERIODS.map(period => (
+              <div key={period} style={{ display: 'grid', gridTemplateColumns: '52px repeat(5, 1fr)', borderBottom: '1px solid #e2e8f0' }}>
+                <div style={{ padding: '0', textAlign: 'center', borderRight: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '64px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>{period}</span>
+                  <span style={{ fontSize: '10px', color: '#e2e8f0', marginTop: '2px' }}>{PERIOD_TIME[period]}</span>
+                </div>
+                {DAYS.map(day => (
+                  <div key={day} style={{ borderLeft: '1px solid #e2e8f0', minHeight: '64px' }} />
+                ))}
+              </div>
+            ))}
+
+            {/* 과목 블록 오버레이 */}
+            <div style={{ position: 'absolute', top: 0, left: '52px', right: 0, bottom: 0, pointerEvents: 'none', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)' }}>
+              {DAYS.map((day) => (
+                <div key={day} style={{ position: 'relative' }}>
+                  {allTimetableBlocks.filter(b => b.day === day).map((block, i) => {
+                    const top = (block.startPeriod - 1) * 64;
+                    const height = block.span * 64 - 3;
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          position: 'absolute',
+                          top: `${top + 2}px`,
+                          left: '3px',
+                          right: '3px',
+                          height: `${height}px`,
+                          background: block.color.bg,
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                          padding: '6px 8px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          gap: '2px',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div style={{ fontSize: '12px', fontWeight: 800, color: '#fff', opacity: 0.9 }}>{block.item.course.code}</div>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>{block.item.course.title}</div>
+                        {block.span >= 2 && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)' }}>{block.item.course.location}</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full p-4 md:p-5 gap-4 bg-slate-50 min-h-0 overflow-y-auto lg:overflow-hidden">
@@ -865,7 +945,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect }) {
             <p style={{ margin: 0, fontSize: '12px', color: '#64748b', textAlign: 'center', lineHeight: '1.5' }}>스마트폰으로 스캔하면 모바일 브라우저에서<br/>내 시간표를 그대로 볼 수 있습니다.</p>
             <div style={{ background: '#fff', padding: '16px', borderRadius: '16px', border: '2px solid #e2e8f0', marginTop: '8px' }}>
               <QRCodeCanvas 
-                value={`https://dsu-web-nav-vibe-code.vercel.app/?student_id=${studentId}`} 
+                value={`https://dsu-web-nav-vibe-code.vercel.app/?student_id=${studentId}&view_only=true`} 
                 size={200}
                 level={"M"}
               />
