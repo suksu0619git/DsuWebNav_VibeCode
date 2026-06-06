@@ -1,4 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import json
@@ -9,15 +13,11 @@ import schemas
 import dummy_data
 from ai_agent import get_chat_response
 
-import os
-from fastapi import FastAPI, Depends, HTTPException
-
 # Initialize DB
 dummy_data.init_db()
 
 app = FastAPI(
-    title="AI Course Scheduler API",
-    root_path="/api" if os.environ.get("VERCEL") else ""
+    title="AI Course Scheduler API"
 )
 
 # Configure CORS for frontend
@@ -29,12 +29,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/courses", response_model=list[schemas.Course])
+# Use APIRouter to handle the /api prefix on Vercel
+router = APIRouter(prefix="/api" if os.environ.get("VERCEL") else "")
+
+@router.get("/courses", response_model=list[schemas.Course])
 def read_courses(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     courses = db.query(models.Course).offset(skip).limit(limit).all()
     return courses
 
-@app.post("/chat", response_model=schemas.ChatResponse)
+@router.post("/chat", response_model=schemas.ChatResponse)
 def chat_with_ai(request: schemas.ChatRequest, db: Session = Depends(get_db)):
     courses = db.query(models.Course).all()
     courses_info = "\n".join([f"{c.code}: {c.title} ({c.professor}) - {c.tags}" for c in courses])
@@ -63,13 +66,13 @@ def chat_with_ai(request: schemas.ChatRequest, db: Session = Depends(get_db)):
             
     return schemas.ChatResponse(reply=reply_message, action_taken=action)
 
-@app.get("/cart", response_model=list[schemas.CartItem])
+@router.get("/cart", response_model=list[schemas.CartItem])
 def get_cart(db: Session = Depends(get_db)):
     # Mock user ID 1
     items = db.query(models.CartItem).filter(models.CartItem.user_id == 1).all()
     return items
 
-@app.post("/cart", response_model=schemas.CartItem)
+@router.post("/cart", response_model=schemas.CartItem)
 def add_to_cart(item: schemas.CartItemCreate, db: Session = Depends(get_db)):
     db_item = models.CartItem(**item.dict())
     db.add(db_item)
@@ -77,7 +80,7 @@ def add_to_cart(item: schemas.CartItemCreate, db: Session = Depends(get_db)):
     db.refresh(db_item)
     return db_item
 
-@app.delete("/cart/{item_id}")
+@router.delete("/cart/{item_id}")
 def delete_cart_item(item_id: int, db: Session = Depends(get_db)):
     item = db.query(models.CartItem).filter(models.CartItem.id == item_id).first()
     if item:
@@ -86,8 +89,9 @@ def delete_cart_item(item_id: int, db: Session = Depends(get_db)):
         return {"status": "ok"}
     raise HTTPException(status_code=404, detail="Item not found")
 
-@app.get("/check_timetable")
+@router.get("/check_timetable")
 def check_timetable(db: Session = Depends(get_db)):
     # Dummy logic to check locations and timings
     return {"status": "ok", "warnings": []}
 
+app.include_router(router)
