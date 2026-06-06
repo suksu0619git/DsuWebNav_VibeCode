@@ -351,7 +351,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
   if (viewOnly) {
     return (
       <div className="w-full h-full bg-white overflow-auto relative">
-        <div ref={timetableRef} className="w-[800px] sm:w-full min-h-[600px] flex flex-col bg-white">
+        <div className="min-w-[600px] flex flex-col bg-white">
           <div className="text-center py-4 bg-primary text-white font-bold text-lg">
             {studentId}님의 시간표
           </div>
