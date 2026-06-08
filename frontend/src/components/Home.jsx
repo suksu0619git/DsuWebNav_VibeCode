@@ -72,7 +72,7 @@ export default function Home({ setActiveTab, onAskAI }) {
           </div>
           <input
             type="text"
-            className="block w-full pl-14 pr-40 py-5 text-base md:text-lg border-2 border-slate-200 rounded-full bg-white shadow-lg text-slate-800 placeholder-slate-400 focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 hover:shadow-xl outline-none"
+            className="block w-full pl-14 pr-40 py-5 text-base md:text-lg border-2 border-slate-300 rounded-full bg-white shadow-lg text-slate-800 placeholder-slate-400 focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 hover:shadow-xl outline-none"
             placeholder="예: 꿀교양 추천해줘, 금공강 시간표 짜줘"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -100,7 +100,7 @@ export default function Home({ setActiveTab, onAskAI }) {
             key={btn.key}
             onClick={() => setActiveTab(btn.key)}
             className={`
-              flex flex-col items-center gap-3 bg-white border-2 border-slate-200
+              flex flex-col items-center gap-3 bg-white border-2 border-slate-300
               px-8 py-6 rounded-2xl font-semibold text-sm
               shadow-md hover:shadow-lg transition-all duration-200
               hover:scale-105 active:scale-95 group w-44

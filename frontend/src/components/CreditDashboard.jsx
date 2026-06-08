@@ -76,18 +76,18 @@ export default function CreditDashboard({ studentId, cart }) {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-lg relative overflow-hidden group hover:shadow-xl transition-shadow">
+        <div className="bg-white border border-slate-300 p-6 rounded-2xl shadow-lg relative overflow-hidden group hover:shadow-xl transition-shadow">
           <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <Award size={120} />
           </div>
           <p className="text-slate-500 font-semibold mb-1">총 기이수 학점</p>
           <div className="text-4xl font-bold text-slate-800 mb-2">{currentEarned} <span className="text-lg text-slate-500 font-normal">/ {reqTotal}</span></div>
-          <div className="w-full bg-slate-200 rounded-full h-2 mt-4">
+          <div className="w-full bg-slate-300 rounded-full h-2 mt-4">
             <div className="bg-primary h-2 rounded-full" style={{ width: `${Math.min(100, (currentEarned/reqTotal)*100)}%` }}></div>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-lg relative overflow-hidden group hover:shadow-xl transition-shadow">
+        <div className="bg-white border border-slate-300 p-6 rounded-2xl shadow-lg relative overflow-hidden group hover:shadow-xl transition-shadow">
           <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <BookOpen size={120} />
           </div>
@@ -96,13 +96,13 @@ export default function CreditDashboard({ studentId, cart }) {
           <p className="text-sm text-slate-500 mt-4">이번 학기 수강 예정 학점입니다.</p>
         </div>
 
-        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-lg relative overflow-hidden group hover:shadow-xl transition-shadow">
+        <div className="bg-white border border-slate-300 p-6 rounded-2xl shadow-lg relative overflow-hidden group hover:shadow-xl transition-shadow">
           <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <PieChart size={120} />
           </div>
           <p className="text-slate-500 font-semibold mb-1">예상 누적 학점</p>
           <div className="text-4xl font-bold text-green-600 mb-2">{prospectiveTotal} <span className="text-lg text-slate-500 font-normal">/ {reqTotal}</span></div>
-          <div className="w-full bg-slate-200 rounded-full h-2 mt-4">
+          <div className="w-full bg-slate-300 rounded-full h-2 mt-4">
             <div className="bg-green-500 h-2 rounded-full" style={{ width: `${Math.min(100, (prospectiveTotal/reqTotal)*100)}%` }}></div>
           </div>
         </div>
@@ -110,8 +110,8 @@ export default function CreditDashboard({ studentId, cart }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* 기이수 학점 입력 폼 */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">기이수 학점 입력</h3>
+        <div className="bg-white border border-slate-300 rounded-2xl p-6 shadow-sm">
+          <h3 className="text-xl font-bold text-slate-800 mb-4 border-b border-slate-300 pb-2">기이수 학점 입력</h3>
           <p className="text-sm text-slate-500 mb-6">지난 학기까지 이수한 학점을 정확히 입력해주세요. (목표 졸업학점: 130)</p>
           
           <div className="space-y-4">
@@ -147,8 +147,8 @@ export default function CreditDashboard({ studentId, cart }) {
         </div>
 
         {/* 잔여 학점 및 추천 가이드 */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">분야별 필수 잔여 학점</h3>
+        <div className="bg-white border border-slate-300 rounded-2xl p-6 shadow-sm">
+          <h3 className="text-xl font-bold text-slate-800 mb-4 border-b border-slate-300 pb-2">분야별 필수 잔여 학점</h3>
           
           <div className="space-y-6 mb-8">
             <div>
@@ -156,7 +156,7 @@ export default function CreditDashboard({ studentId, cart }) {
                 <span className="font-semibold text-slate-600">전공 필수</span>
                 <span className="text-sm font-bold text-red-600">잔여: {remMajorReq}학점</span>
               </div>
-              <div className="w-full bg-slate-200 rounded-full h-3">
+              <div className="w-full bg-slate-300 rounded-full h-3">
                 <div className="bg-red-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, (earnedMajorReq/reqMajorReq)*100)}%` }}></div>
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function CreditDashboard({ studentId, cart }) {
                 <span className="font-semibold text-slate-600">전공 선택</span>
                 <span className="text-sm font-bold text-rose-600">잔여: {remMajorEle}학점</span>
               </div>
-              <div className="w-full bg-slate-200 rounded-full h-3">
+              <div className="w-full bg-slate-300 rounded-full h-3">
                 <div className="bg-rose-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, (earnedMajorEle/reqMajorEle)*100)}%` }}></div>
               </div>
             </div>
@@ -176,13 +176,13 @@ export default function CreditDashboard({ studentId, cart }) {
                 <span className="font-semibold text-slate-600">교양 필수/선택</span>
                 <span className="text-sm font-bold text-orange-600">잔여: {remGeneral}학점</span>
               </div>
-              <div className="w-full bg-slate-200 rounded-full h-3">
+              <div className="w-full bg-slate-300 rounded-full h-3">
                 <div className="bg-orange-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, (earnedGeneral/reqGeneral)*100)}%` }}></div>
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
+          <div className="bg-slate-50 p-5 rounded-xl border border-slate-300">
             <h4 className="font-bold text-slate-800 flex items-center gap-2 mb-3">
               <CheckCircle size={18} className="text-primary" /> AI 수강 추천 가이드
             </h4>

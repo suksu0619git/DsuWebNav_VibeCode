@@ -522,7 +522,7 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
 
         {/* 왼쪽: 시간표 그리드 (캡처 대상 영역) */}
-        <div ref={timetableRef} className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden relative">
+        <div ref={timetableRef} className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-300 overflow-hidden relative">
           <div className="overflow-x-auto flex-1 flex flex-col">
             <div style={{ minWidth: '600px', display: 'flex', flexDirection: 'column', flex: 1 }}>
           

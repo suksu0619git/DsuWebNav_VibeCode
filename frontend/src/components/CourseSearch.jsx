@@ -191,19 +191,19 @@ export default function CourseSearch({ studentId, onAdd, initialSearchTerm = '',
       <div className="flex gap-2 mb-6">
         <button 
           onClick={() => setActiveTab('all')}
-          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'all' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-200'}`}
+          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'all' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-300'}`}
         >
           전체 보기
         </button>
         <button 
           onClick={() => setActiveTab('major')}
-          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'major' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-200'}`}
+          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'major' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-300'}`}
         >
           컴퓨터계열 (전공)
         </button>
         <button 
           onClick={() => setActiveTab('general')}
-          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'general' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-200'}`}
+          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${activeTab === 'general' ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-300'}`}
         >
           교양 과목
         </button>
@@ -212,10 +212,10 @@ export default function CourseSearch({ studentId, onAdd, initialSearchTerm = '',
       <div className="flex-1 overflow-auto custom-scrollbar pr-2">
         <div className="grid gap-4">
           {displayCourses.map(course => (
-            <div key={course.id} className="bg-white border border-slate-200 p-5 rounded-xl hover:bg-white transition-colors flex justify-between items-center group">
+            <div key={course.id} className="bg-white border border-slate-300 p-5 rounded-xl hover:bg-white transition-colors flex justify-between items-center group">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold px-2 py-1 bg-slate-200 rounded-md text-slate-600">{course.code}</span>
+                  <span className="text-xs font-bold px-2 py-1 bg-slate-300 rounded-md text-slate-600">{course.code}</span>
                   <span className="text-xs font-bold px-2 py-1 bg-primary/20 text-primary rounded-md">{course.category}</span>
                   {course.is_pn_eligible && (
                     <span className="text-xs font-bold px-2 py-1 bg-green-100 text-green-700 border border-green-200 rounded-md">P/N 가능</span>
@@ -232,7 +232,7 @@ export default function CourseSearch({ studentId, onAdd, initialSearchTerm = '',
                       <button 
                         key={trimmed} 
                         onClick={() => isSelected ? handleRemoveTag(trimmed) : handleAddTag(trimmed)}
-                        className={`text-xs flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${isSelected ? 'bg-primary/30 text-primary font-bold shadow-sm border border-primary/30' : 'text-slate-500 bg-slate-100/50 hover:bg-slate-200'}`}
+                        className={`text-xs flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${isSelected ? 'bg-primary/30 text-primary font-bold shadow-sm border border-primary/30' : 'text-slate-500 bg-slate-100/50 hover:bg-slate-300'}`}
                       >
                         <Tag size={10} /> {trimmed}
                       </button>
@@ -250,7 +250,7 @@ export default function CourseSearch({ studentId, onAdd, initialSearchTerm = '',
                 </button>
                 <button 
                   onClick={() => setSelectedCourseForSyllabus(course)}
-                  className="bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800 p-3 rounded-xl transition-all"
+                  className="bg-slate-100 text-slate-600 hover:bg-slate-300 hover:text-slate-800 p-3 rounded-xl transition-all"
                   title="강의계획서 보기"
                 >
                   <FileText size={20} />

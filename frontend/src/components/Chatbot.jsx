@@ -62,7 +62,7 @@ export default function Chatbot({ onUpdateCart, initialMessage = '' }) {
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {messages.map((m, i) => (
           <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${m.role === 'user' ? 'bg-primary' : 'bg-slate-200'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${m.role === 'user' ? 'bg-primary' : 'bg-slate-300'}`}>
               {m.role === 'user' ? <User size={16} className="text-white" /> : <Bot size={16} className="text-slate-600" />}
             </div>
             <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed ${
@@ -76,10 +76,10 @@ export default function Chatbot({ onUpdateCart, initialMessage = '' }) {
         ))}
         {isLoading && (
           <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center shrink-0">
               <Bot size={16} className="text-slate-600" />
             </div>
-            <div className="bg-slate-200/50 p-3 rounded-2xl rounded-tl-none flex gap-1 items-center">
+            <div className="bg-slate-300/50 p-3 rounded-2xl rounded-tl-none flex gap-1 items-center">
               <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
               <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay:'0.2s'}}></div>
               <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay:'0.4s'}}></div>
@@ -88,7 +88,7 @@ export default function Chatbot({ onUpdateCart, initialMessage = '' }) {
         )}
         <div ref={endRef} />
       </div>
-      <form onSubmit={handleSend} className="p-4 border-t border-slate-200 bg-slate-50">
+      <form onSubmit={handleSend} className="p-4 border-t border-slate-300 bg-slate-50">
         <div className="relative flex items-center">
           <input 
             type="text" 
