@@ -69,6 +69,62 @@ function groupToBlocks(slots) {
   return blocks;
 }
 
+// ── 연강 동선 경고 통합 박스 (별도 컴포넌트 → Hooks 규칙 준수)
+function TransitWarningBox({ transitWarnings }) {
+  const [showDetail, setShowDetail] = useState(false);
+  const KCAL_PER_TRANSIT = 20; // 건물 간 이동 1회(약 5분 보행) ≈ 20 kcal (체중 60kg 기준)
+  const totalKcal = transitWarnings.length * KCAL_PER_TRANSIT;
+
+  return (
+    <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: '10px', overflow: 'hidden' }}>
+      {/* 통합 헤더 – 클릭 시 상세 토글 */}
+      <div
+        style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', color: '#d97706', fontSize: '13px', cursor: 'pointer', userSelect: 'none' }}
+        onClick={() => setShowDetail(v => !v)}
+      >
+        <Building2 size={16} style={{ flexShrink: 0 }} />
+        <span style={{ flex: 1 }}>
+          <strong>연강 동선 경고</strong> · 총 {transitWarnings.length}건의 건물 간 이동 발생
+          &nbsp;·&nbsp;
+          <span style={{ background: 'rgba(245,158,11,0.2)', borderRadius: '20px', padding: '1px 8px', fontWeight: 700 }}>
+            🔥 약 {totalKcal} kcal 소모 예상
+          </span>
+        </span>
+        <span style={{ fontSize: '11px', color: '#92400e', fontWeight: 600 }}>
+          {showDetail ? '▲ 접기' : '▼ 자세히'}
+        </span>
+      </div>
+
+      {/* 펼치면 개별 이동 내역 */}
+      {showDetail && (
+        <div style={{ borderTop: '1px solid rgba(245,158,11,0.2)', padding: '6px 14px 10px' }}>
+          {transitWarnings.map((warn, index) => (
+            <div
+              key={index}
+              style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '5px 0', borderBottom: index < transitWarnings.length - 1 ? '1px dashed rgba(245,158,11,0.2)' : 'none', fontSize: '12px', color: '#92400e' }}
+            >
+              <span style={{ flexShrink: 0, marginTop: '1px' }}>🏃</span>
+              <span>
+                <strong>{warn.day}요일 {warn.periods}</strong>
+                &nbsp;—&nbsp;
+                {warn.courseFrom} <span style={{ color: '#d97706' }}>({warn.locFrom})</span>
+                &nbsp;→&nbsp;
+                {warn.courseTo} <span style={{ color: '#d97706' }}>({warn.locTo})</span>
+                <span style={{ marginLeft: '6px', background: 'rgba(245,158,11,0.15)', borderRadius: '4px', padding: '0 5px', fontSize: '11px' }}>
+                  ~{KCAL_PER_TRANSIT} kcal
+                </span>
+              </span>
+            </div>
+          ))}
+          <div style={{ marginTop: '8px', fontSize: '11px', color: '#92400e', opacity: 0.7 }}>
+            ※ 체중 60kg 기준, 건물 간 이동(약 5분 보행) 시 소모 칼로리 추정값
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Timetable({ studentId, cart, onRemove, onSlotSelect, viewOnly = false }) {
   const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   const [hoveredCourse, setHoveredCourse] = useState(null);
@@ -507,14 +563,9 @@ export default function Timetable({ studentId, cart, onRemove, onSlotSelect, vie
               <span><strong>시간표 겹침 경고:</strong> 동일한 요일/교시에 겹치는 강의가 있습니다. 장바구니 항목을 확인하세요.</span>
             </div>
           )}
-          {transitWarnings.map((warn, index) => (
-            <div key={index} style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '10px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', color: '#fbbf24', fontSize: '13px' }}>
-              <Building2 size={16} />
-              <span>
-                <strong>연강 동선 경고:</strong> {warn.day}요일 {warn.periods} 연강 시 <strong>{warn.courseFrom} ({warn.locFrom})</strong> → <strong>{warn.courseTo} ({warn.locTo})</strong> 건물 간 이동이 필요해 시간이 촉박할 수 있습니다!
-              </span>
-            </div>
-          ))}
+          {transitWarnings.length > 0 && (
+            <TransitWarningBox transitWarnings={transitWarnings} />
+          )}
         </div>
       )}
 

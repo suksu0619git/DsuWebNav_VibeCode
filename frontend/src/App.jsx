@@ -204,7 +204,7 @@ function App() {
               ×
             </button>
           </div>
-          <Chatbot onUpdateCart={fetchCart} initialMessage={initialChatMessage} />
+          <Chatbot onUpdateCart={fetchCart} initialMessage={initialChatMessage} studentId={studentId} />
         </div>
       )}
 

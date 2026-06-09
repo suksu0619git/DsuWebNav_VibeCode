@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Send, Bot, User } from 'lucide-react';
 
-export default function Chatbot({ onUpdateCart, initialMessage = '' }) {
+export default function Chatbot({ onUpdateCart, initialMessage = '', studentId = '' }) {
   const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:8000');
   const [messages, setMessages] = useState([
     { role: 'assistant', content: '안녕하세요! 수강신청 비서입니다. 무엇을 도와드릴까요? (예: "장바구니에 CS101 담아줘", "파이썬 관련 교양 추천해줘")' }
@@ -19,7 +19,11 @@ export default function Chatbot({ onUpdateCart, initialMessage = '' }) {
   useEffect(() => {
     if (initialMessage && initialMessage.trim()) {
       const autoSend = async () => {
-        setMessages(prev => [...prev, { role: 'user', content: initialMessage }]);
+        // Display only the user's question part (before ||studentId)
+        const displayMsg = initialMessage.includes('||')
+          ? initialMessage.split('||')[0]
+          : initialMessage;
+        setMessages(prev => [...prev, { role: 'user', content: displayMsg }]);
         setIsLoading(true);
         try {
           const res = await axios.post(`${API_URL}/chat`, { message: initialMessage });
@@ -40,12 +44,14 @@ export default function Chatbot({ onUpdateCart, initialMessage = '' }) {
     if (!input.trim() || isLoading) return;
 
     const userMsg = input;
+    // Append studentId so backend knows which cart to update
+    const msgWithId = studentId ? `${userMsg}||${studentId}` : userMsg;
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setInput('');
     setIsLoading(true);
 
     try {
-      const res = await axios.post(`${API_URL}/chat`, { message: userMsg });
+      const res = await axios.post(`${API_URL}/chat`, { message: msgWithId });
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
       if (res.data.action_taken) {
         onUpdateCart();
