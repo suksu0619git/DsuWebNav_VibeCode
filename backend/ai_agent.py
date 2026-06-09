@@ -3,11 +3,14 @@ import re
 import json
 from dotenv import load_dotenv
 
-load_dotenv(override=True)
+env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+load_dotenv(dotenv_path=env_path, override=True)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not GEMINI_API_KEY:
     print("WARNING: GEMINI_API_KEY is not set. Rule-based fallback will be used.")
+else:
+    print(f"INFO: GEMINI_API_KEY is loaded successfully (starts with {GEMINI_API_KEY[:5]})")
 
 
 # ────────────────────────────────────────────────────────────────
